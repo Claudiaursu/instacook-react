@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { ThemeProvider } from './src/utils/theme/theme.provider';
 import { LoginFormProvider } from './src/store/login.context';
 import { LoginForm } from './src/components/login/LoginForm';
+import { Provider } from 'react-redux';
+import { store } from './src/store/store';
 
 export default function App() {
   return (
@@ -12,11 +14,15 @@ export default function App() {
     //   <StatusBar style="auto" /> */}
     // </View>
 
-  <ThemeProvider>
+    <Provider store = {store}>
+      <ThemeProvider>
       <LoginFormProvider> 
+       
+
           <LoginForm/>
       </LoginFormProvider> 
     </ThemeProvider>  
+    </Provider>
   );
 }
 

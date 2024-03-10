@@ -9,6 +9,7 @@ import { TextInput } from "../text-input";
 import { useLoginFormContext } from "../../store/login.context";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import React from "react";
+import { useDoLoginMutation } from '../../services/auth.service';
 
 export const LoginForm = () => {
   const {
@@ -20,13 +21,49 @@ export const LoginForm = () => {
   const {username, password, setLoginData} = useLoginFormContext();
   const [error, setError] = useState("");
   const clearError = () => setError("");
-
+  const [doLogin, {isSuccess: loginSuccess }] = useDoLoginMutation();
 
   const handleLogin = async () => {
     try {
       console.log(username, " + ", password)
+
+      const loginObj = {
+        email: username,
+        parola: password
+      }
+
+      const res = await doLogin(loginObj);
+      console.log("response ", res)
+
     } catch (err: any) {
-      setError(err.message);
+      console.log("err ", err)
+
+      //console.log(err)
+    }
+  };
+
+
+  const getTokenFromApiAsync = async () => {
+    try {
+      const response = await fetch(
+        "http://192.168.100.46:8080/v1/auth/login",
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: username,
+            parola: password,
+          }),
+        }
+      );
+
+      const json = await response.json();
+      console.log("RESPONSE ", json);
+    } catch (error) {
+      console.error(error);
     }
   };
   
@@ -63,7 +100,8 @@ export const LoginForm = () => {
       />
 
       <Button sx={styles.signInButton}
-      onPress={handleLogin} 
+      //onPress={handleLogin} 
+      onPress={getTokenFromApiAsync} 
       title="Sign in"/>
      
       
