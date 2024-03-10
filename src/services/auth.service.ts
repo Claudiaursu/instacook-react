@@ -5,6 +5,10 @@ type User = {
   parola: string;
 };
 
+type LoginResult = {
+  token: string
+}
+
 export const loginSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
@@ -12,7 +16,7 @@ export const loginSlice = createApi({
   }),
   tagTypes: ["Login"],
   endpoints: (builder) => ({
-    doLogin: builder.mutation<undefined, User>({
+    doLogin: builder.mutation<LoginResult, User>({
       query: (login) => ({
         url: "/login",
         method: "POST",

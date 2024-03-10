@@ -32,17 +32,22 @@ export const LoginForm = () => {
         parola: password
       }
 
+      let token;
       const res = await doLogin(loginObj);
-      console.log("response ", res)
+      if ('data' in res) {
+        token = res.data.token;
+        console.log("TOKEN ", token)
+      } else if ('error' in res) {
+        console.log('Error:', res.error);
+      }
 
     } catch (err: any) {
       console.log("err ", err)
-
-      //console.log(err)
     }
   };
 
 
+  //varianta alternativa
   const getTokenFromApiAsync = async () => {
     try {
       const response = await fetch(
@@ -100,8 +105,7 @@ export const LoginForm = () => {
       />
 
       <Button sx={styles.signInButton}
-      //onPress={handleLogin} 
-      onPress={getTokenFromApiAsync} 
+      onPress={handleLogin} 
       title="Sign in"/>
      
       
