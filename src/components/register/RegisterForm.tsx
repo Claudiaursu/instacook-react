@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
 import { SafeAreaView } from "react-native";
 import { View } from 'react-native'
-import loginStyles from "./Login.styles";
+import loginStyles from "./Register.styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text } from '../text';
 import { Button } from '../button';
@@ -14,9 +14,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
 
-type LoginProps = NativeStackScreenProps<RootStackParamList, "Login">;
+type RegisterProps = NativeStackScreenProps<RootStackParamList, "Register">;
 
-export const LoginForm = ({navigation}: LoginProps) => {
+export const RegisterForm = ({navigation}: RegisterProps) => {
   const {
     theme: { colors },
   } = useThemeConsumer();
@@ -86,7 +86,7 @@ export const LoginForm = ({navigation}: LoginProps) => {
   return (
     <SafeAreaView style={styles.authContainer}>
       <Text sx={styles.signInLabel} variant="title">
-        Sign in
+        Create a new account
       </Text>
 
       <TextInput
@@ -117,7 +117,7 @@ export const LoginForm = ({navigation}: LoginProps) => {
 
       <Button sx={styles.signInButton}
       onPress={handleLogin} 
-      title="Sign in"/>
+      title="Create account"/>
 
       <Button 
       variant="primary"
@@ -140,12 +140,12 @@ export const LoginForm = ({navigation}: LoginProps) => {
         </View>
       </View>
       <View style={styles.newAccount}>
-        <Text>Don't have an account?</Text>
+        <Text>Have an account?</Text>
         <Text
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => navigation.navigate("Login")}
           sx={styles.createNewAccount}
         >
-          Create one
+          Login
         </Text>
       </View>
 
