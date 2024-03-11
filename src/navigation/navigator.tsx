@@ -17,12 +17,15 @@ export const Navigator = () => {
   });
   
   return (
-    // <NavigationContainer theme={theme}>
-    //   {user ? <Dashboard /> : <Authentication />}
-    // </NavigationContainer>
+    <NavigationContainer theme={theme}>
+      {user ? <Dashboard /> : 
+      (
+        <LoginFormProvider>
+        <Authentication />
+        </LoginFormProvider>
+      )}
+    </NavigationContainer>
 
-    <LoginFormProvider>
-    <Authentication />
-    </LoginFormProvider>
+    
   );
 };

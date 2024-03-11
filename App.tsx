@@ -34,13 +34,13 @@ export default function App() {
 
    
     <Provider store={store}>
-    <NavigationContainer theme={theme}>
+    
       <ThemeProvider>
        
           <Navigator />
        
       </ThemeProvider>
-    </NavigationContainer>
+  
   </Provider>
 
   );
