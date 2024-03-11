@@ -50,10 +50,12 @@ export const LoginForm = ({navigation}: LoginProps) => {
 
       } else if ('error' in res) {
         console.log('Error:', res.error);
+        setError("The password or the username are incorrect")
       }
 
     } catch (err: any) {
       console.log("err ", err)
+      setError("The password or the username are incorrect")
     }
   };
 
@@ -114,6 +116,8 @@ export const LoginForm = ({navigation}: LoginProps) => {
           })
         }
       />
+
+      {error && <Text sx={styles.errorText}>{error}</Text>}
 
       <Button sx={styles.signInButton}
       onPress={handleLogin} 

@@ -15,7 +15,7 @@ export const Navigator = () => {
       toggleThemeSchema();
     }
   });
-
+  
   return (
     // <NavigationContainer theme={theme}>
     //   {user ? <Dashboard /> : <Authentication />}
