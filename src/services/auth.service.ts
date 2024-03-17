@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 type User = {
-  email: string;
+  username: string;
   parola: string;
 };
 

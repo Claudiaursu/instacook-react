@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useDispatch } from "react-redux";
-import { updateToken } from "../../store/tokenSlice";
+import { updateToken, updateUsername } from "../../store/tokenSlice";
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -39,7 +39,7 @@ export const LoginForm = ({navigation}: HomeProps) => {
       console.log(username, " + ", password)
 
       const loginObj = {
-        email: username,
+        username: username,
         parola: password
       }
 
@@ -47,20 +47,13 @@ export const LoginForm = ({navigation}: HomeProps) => {
       const res = await doLogin(loginObj);
       if ('data' in res) {
         token = res.data.token;
-        console.log("TOKEN ", token)
-
-        await AsyncStorage.setItem("username", username);
-        await AsyncStorage.setItem("token", token);
-        console.log("^^^^^^ inainte", username, " ", password, " ", userToken)
-        //setLoginData(token);
-        setLoginData({
-          username,
-          password,
-          userToken: token
-        })
-        console.log("^^^^^^ dupa", username, " ", password, " ", userToken)
-
         dispatch(updateToken(token))
+        dispatch(updateUsername(username))
+
+        setLoginData({
+          username:"",
+          password: "",
+        })
 
       } else if ('error' in res) {
         console.log('Error:', res.error);
@@ -98,6 +91,14 @@ export const LoginForm = ({navigation}: HomeProps) => {
       console.error(error);
     }
   };
+
+  const redirectToRegister = () => {
+    navigation.navigate("Register")
+    setLoginData({
+      username:"",
+      password: "",
+    })
+  }
   
   return (
     <SafeAreaView style={styles.authContainer}>
@@ -108,7 +109,7 @@ export const LoginForm = ({navigation}: HomeProps) => {
       <TextInput
         onFocus={clearError}
         value={username}
-        label="Email"
+        label="Username"
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
@@ -160,7 +161,7 @@ export const LoginForm = ({navigation}: HomeProps) => {
       <View style={styles.newAccount}>
         <Text>Don't have an account?</Text>
         <Text
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => redirectToRegister()}
           sx={styles.createNewAccount}
         >
           Create one

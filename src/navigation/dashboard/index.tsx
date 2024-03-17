@@ -6,7 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { RootStackParamList } from "../navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import Home from "../../screens/Home";
-import Home2 from "../../screens/Home2";
+import Profile from "../../screens/Profile";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -35,7 +35,7 @@ export const Dashboard = () => {
       })}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Home2" component={Home2} />
+      <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 };

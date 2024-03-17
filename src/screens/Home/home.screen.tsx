@@ -10,44 +10,33 @@ import { StyleSheet } from "react-native";
 import uuid from 'react-native-uuid';
 import { Button } from "../../components/button";
 import { Text } from "../../components/text";
+import { useDispatch, useSelector } from "react-redux";
+import { updateToken } from "../../store/tokenSlice";
+import { RootState } from "../../store/store";
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
 const Home = ({ navigation }: HomeProps) => {
 
-    // const [collections, setCollections] = useState<ICollection[]>([]);
-    // const [isVisible, setIsVisible] = useState(false);
-    // const [titleValue, setTitleValue] = useState('');
-    // const [descriptionValue, setDescriptionValue] = useState('');
+  const dispatch = useDispatch();
+  const username = useSelector((state: RootState) => state.userData.username);
 
-    const {
-        theme,
-        activeScheme,
-        toggleThemeSchema
-    } = useThemeConsumer();
+  const {
+      theme,
+      activeScheme,
+      toggleThemeSchema
+  } = useThemeConsumer();
 
     //const [showForm, setShowForm] = useState(false);
     // const handleButtonClick = () => {
     //   setShowForm(true);
     // };
   
-  // const handleFormClose = () => {
-  //   setIsVisible(false);
-  // };
 
-  const openIdeas = () => {
-    
+  const logout = () => {
+    dispatch(updateToken(""))
   }
-  
-
-    // useEffect(()=>{
-    //     getCollections();
-    // }, [])
-
-    // const openNewCollectionModal = () =>{
-    //    setIsVisible(true);
-    // }
 
     return (
    
@@ -57,7 +46,7 @@ const Home = ({ navigation }: HomeProps) => {
             {margin: 18,
                 textAlign: 'center'  
             }} 
-            variant = "title">Hello! 
+            variant = "title">Hello {username}! 
         </Text>
 
         <Text   
@@ -81,8 +70,8 @@ const Home = ({ navigation }: HomeProps) => {
         <Button 
          sx={{margin: 10}}
          variant="primary"
-         //onPress = { () => navigation.navigate("Ideas") } 
-         title="Out of ideas?" /> 
+         onPress = { () => logout() } 
+         title="Sign out"/> 
         </View>
 
         </View>

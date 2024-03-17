@@ -12,9 +12,9 @@ import { Button } from "../../components/button";
 import { Text } from "../../components/text";
 
 
-type HomeProps = NativeStackScreenProps<RootStackParamList, "Home2">;
+type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
-const Home2 = ({ navigation }: HomeProps) => {
+const Profile = ({ navigation }: HomeProps) => {
 
     // const [collections, setCollections] = useState<ICollection[]>([]);
     // const [isVisible, setIsVisible] = useState(false);
@@ -26,29 +26,8 @@ const Home2 = ({ navigation }: HomeProps) => {
         activeScheme,
         toggleThemeSchema
     } = useThemeConsumer();
-
-    //const [showForm, setShowForm] = useState(false);
-    // const handleButtonClick = () => {
-    //   setShowForm(true);
-    // };
+ 
   
-  // const handleFormClose = () => {
-  //   setIsVisible(false);
-  // };
-
-  const openIdeas = () => {
-    
-  }
-  
-
-    // useEffect(()=>{
-    //     getCollections();
-    // }, [])
-
-    // const openNewCollectionModal = () =>{
-    //    setIsVisible(true);
-    // }
-
     return (
    
     <View>
@@ -121,4 +100,4 @@ const styles = () => {
       })
     }
 
-export default Home2;
+export default Profile;
