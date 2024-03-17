@@ -13,18 +13,22 @@ import { useDoLoginMutation } from '../../services/auth.service';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
+import { useDispatch } from "react-redux";
+import { updateToken } from "../../store/tokenSlice";
 
-type LoginProps = NativeStackScreenProps<RootStackParamList, "Login">;
+type HomeProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
-export const LoginForm = ({navigation}: LoginProps) => {
+export const LoginForm = ({navigation}: HomeProps) => {
   const {
     theme: { colors },
   } = useThemeConsumer();
  
   const styles = loginStyles(colors);
 
-  const { username, password, setLoginData } = useLoginFormContext();
+  const { username, password, setLoginData, userToken } = useLoginFormContext();
   const { theme, activeScheme, toggleThemeSchema } = useThemeConsumer();
+  const dispatch = useDispatch();
+
 
   const [error, setError] = useState("");
   const clearError = () => setError("");
@@ -47,6 +51,16 @@ export const LoginForm = ({navigation}: LoginProps) => {
 
         await AsyncStorage.setItem("username", username);
         await AsyncStorage.setItem("token", token);
+        console.log("^^^^^^ inainte", username, " ", password, " ", userToken)
+        //setLoginData(token);
+        setLoginData({
+          username,
+          password,
+          userToken: token
+        })
+        console.log("^^^^^^ dupa", username, " ", password, " ", userToken)
+
+        dispatch(updateToken(token))
 
       } else if ('error' in res) {
         console.log('Error:', res.error);

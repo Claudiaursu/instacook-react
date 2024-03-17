@@ -36,8 +36,9 @@ export default function App() {
     <Provider store={store}>
     
       <ThemeProvider>
-       
-          <Navigator />
+      {/* <LoginFormProvider> */}
+        <Navigator />
+      {/* </LoginFormProvider> */}
        
       </ThemeProvider>
   
