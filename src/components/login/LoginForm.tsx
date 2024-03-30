@@ -15,6 +15,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useDispatch } from "react-redux";
 import { updateToken, updateUsername } from "../../store/tokenSlice";
+import { selectProfilePhotoValue, setValue } from "../../store/profilePhoto.slice";
+
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -54,6 +56,9 @@ export const LoginForm = ({navigation}: HomeProps) => {
           username:"",
           password: "",
         })
+
+        const profilePicUrl = `${username}/profile_image.jpg`;
+        dispatch(setValue(profilePicUrl))
 
       } else if ('error' in res) {
         console.log('Error:', res.error);

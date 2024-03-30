@@ -21,8 +21,6 @@ export const PictureComponent = () => {
     const dispatch = useDispatch();
     const imageUrlValue = useSelector(selectProfilePhotoValue);
     const [loading, setLoading] = useState(true); 
-    //const username = useSelector((state: RootState) => state.userData.username);
-
 
     const getPicture = async (photoPath: string) => {
         const imgRef = ref(storage, photoPath);

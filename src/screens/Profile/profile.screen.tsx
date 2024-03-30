@@ -28,7 +28,7 @@ const Profile = ({ navigation }: HomeProps) => {
     const dispatch = useDispatch();
     const { data, error, isLoading } = useGetUserByUsernameQuery(username);
     const [currentProfileVersion, setCurrentProfileVersion] = useState(1);
-
+    const [profilePicText, setProfilePicText] = useState("Add profile photo");
 
     const uploadImageAsync = async (uri: string) => {
       const blob: Blob = await new Promise((resolve, reject) => {
@@ -56,6 +56,7 @@ const Profile = ({ navigation }: HomeProps) => {
         const result = await uploadBytesResumable(fileRef, blob, metadata);
         dispatch(setValue(imgPath))
         setCurrentProfileVersion(currentProfileVersion + 1);
+        setProfilePicText("Change profile photo")
         return await getDownloadURL(fileRef);
 
       } catch (error) {
@@ -81,6 +82,7 @@ const Profile = ({ navigation }: HomeProps) => {
     }
 
     useEffect(() => {
+      console.log("s-a schimbat poza......")
   }, [currentProfileVersion])
 
     const {
@@ -134,7 +136,7 @@ const Profile = ({ navigation }: HomeProps) => {
         sx={{margin: 10}}
         variant="primary"
         onPress = { () => uploadPhoto() } 
-        title="Add profile photo" />
+        title={profilePicText} />
 
         <View style={{ flexDirection: "row" }}>
          <View>
