@@ -34,10 +34,6 @@ const Home = ({ navigation }: HomeProps) => {
     // };
   
 
-  const logout = () => {
-    dispatch(updateToken(""))
-  }
-
     return (
    
     <View>
@@ -66,13 +62,7 @@ const Home = ({ navigation }: HomeProps) => {
           title=" + " />
         </View>
 
-        <View>
-        <Button 
-         sx={{margin: 10}}
-         variant="primary"
-         onPress = { () => logout() } 
-         title="Sign out"/> 
-        </View>
+        
 
         </View>
 
