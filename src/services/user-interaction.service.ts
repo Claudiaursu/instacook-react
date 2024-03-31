@@ -1,6 +1,15 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
 
+type UrmarireDto = {
+  id: string,
+  urmaritor_id: number,
+  urmarit_id: number,
+  deletedAt: Timespan;
+  createdAt: Timespan;
+  updatedAt: Timespan;
+}
+
 type UserDto = {
   id: string,
   username: string;
@@ -11,6 +20,8 @@ type UserDto = {
   taraOrigine: string;
   telefon: string;
   totalPuncte: number;
+  followers: UrmarireDto[];
+  follows: UrmarireDto[];
   deletedAt: Timespan;
   createdAt: Timespan;
   updatedAt: Timespan;

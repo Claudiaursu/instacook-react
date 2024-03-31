@@ -18,6 +18,7 @@ import { PictureComponent } from "../../components/profile-picture/profile-pictu
 import { selectProfilePhotoValue, setValue } from "../../store/profilePhoto.slice";
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes, deleteObject, uploadBytesResumable } from 'firebase/storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
@@ -83,6 +84,7 @@ const Profile = ({ navigation }: HomeProps) => {
 
     useEffect(() => {
       console.log("s-a schimbat poza......")
+      console.log("TeMa ", theme)
   }, [currentProfileVersion])
 
     const {
@@ -97,70 +99,123 @@ const Profile = ({ navigation }: HomeProps) => {
   
     return (
    
-    <View>
-        <Text   
-        sx = {
-            {margin: 18,
-                textAlign: 'center'  
-            }} 
-            variant = "title">Hello, {username}! 
+    <View>       
+      
+      {/* Detalii cont + Poza  */}
+      <View style={{ flexDirection: 'row', backgroundColor: theme.colors.background2}}>
+      
+      <View style={{ flex: 1,  marginTop: 7 }}>
+
+      <View style={{ flexDirection: 'row', margin: 5}}>
+      <MaterialCommunityIcons name="chef-hat" size={24} color={theme.colors.primary} />
+      <Text   
+      sx = {
+          {
+              textAlign: 'left'  
+          }} 
+          variant = "profileTitle">{username}
+      </Text>
+      </View>
+
+      <Text
+        sx={{
+          margin: 5,
+          textAlign: 'left'
+        }}
+        variant="subtitle"> {data?.nume} {data?.prenume}
+      </Text>
+
+      <Text
+        sx={{
+          margin: 5,
+          textAlign: 'left'
+        }}
+        variant="subtitle"> {data?.email}
+      </Text>
+
+      <Text
+        sx={{
+          margin: 5,
+          textAlign: 'left'
+        }}
+        variant="subtitle"> {data?.taraOrigine}
+      </Text>
+
+       {/* Nr Retete + Followers + Follows  */}
+      <View style={{ flexDirection: 'row',  marginTop: 7 }}>
+        <View>
+        <Text
+          sx={{
+            margin: 5,
+            textAlign: 'center'
+          }}
+          variant="subtitle"> Followers
         </Text>
-
-        <Text   
-        sx = {
-            {margin: 5,
-                textAlign: 'left'  
-            }} 
-            variant = "subtitle"> {data?.nume} {data?.prenume}
+          <Text
+          sx={{
+            margin: 5,
+            textAlign: 'center'
+          }}
+          variant="subtitle"> {data?.followers.length}
         </Text>
+        </View>
 
-        <Text   
-        sx = {
-            {margin: 5,
-                textAlign: 'left'  
-            }} 
-            variant = "subtitle"> {data?.email}
-        </Text>
+        <View>
+          <Text
+            sx={{
+              margin: 5,
+              textAlign: 'center'
+            }}
+            variant="subtitle"> Follows
+          </Text>
+            <Text
+            sx={{
+              margin: 5,
+              textAlign: 'center'
+            }}
+            variant="subtitle"> {data?.follows.length}
+          </Text>
+        </View>
 
-        <Text   
-        sx = {
-            {margin: 5,
-                textAlign: 'left'  
-            }} 
-            variant = "subtitle"> {data?.taraOrigine}
-        </Text>
+        <View>
+        <Text
+            sx={{
+              margin: 5,
+              textAlign: 'center'
+            }}
+            variant="subtitle"> Recipes
+          </Text>
+            <Text
+            sx={{
+              margin: 5,
+              textAlign: 'center'
+            }}
+            variant="subtitle"> {data?.follows.length}
+          </Text>
+        </View>
 
-        <PictureComponent></PictureComponent>
+      </View>
+        
+      </View>
 
+      <View style={{ marginTop: 7 }}>
+        <PictureComponent />
         <Button 
         sx={{margin: 10}}
         variant="primary"
         onPress = { () => uploadPhoto() } 
         title={profilePicText} />
+      </View>
+      
+    </View>
 
-        <View style={{ flexDirection: "row" }}>
-         <View>
-          <Button 
-          sx={{margin: 10}}
-          variant="primary"
-          //onPress = { () => openNewCollectionModal() } 
-          title=" + " />
-        </View>
-
-        </View>
-
-      {/* <AddCollectionModal
-        isVisible={showForm}
-        onClose={handleFormClose}
-      /> */}
-
-        <View>
-        <Button 
-         sx={{margin: 10}}
-         variant="primary"
-         onPress = { () => logout() } 
-         title="Sign out"/> 
-        </View>
+      <View>
+      <Button 
+        sx={{margin: 10}}
+        variant="primary"
+        onPress = { () => logout() } 
+        title="Sign out"/> 
+      </View>
 
     </View>
     )
@@ -187,6 +242,10 @@ const styles = () => {
           padding: 10,
           marginBottom: 10,
         },
+        container: {
+          flexDirection: 'row', // Set flexDirection to 'row' to place components next to each other horizontally
+          alignItems: 'center', 
+        }
       })
     }
 

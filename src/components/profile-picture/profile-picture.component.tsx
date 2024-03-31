@@ -55,10 +55,10 @@ export const PictureComponent = () => {
      
       <Provider store={store}> 
         <>
-          <View style={styles(activeScheme).picture}>
+          <View>
                 <Image 
                 source = {{uri: imageUrl}}
-                style = {{borderRadius: 99999, height: 100, width: 100}}
+                style = {{borderRadius: 99999, height: 100, width: 100, margin: 10}}
                 />
           </View>
         </>
@@ -70,7 +70,7 @@ export const PictureComponent = () => {
     return (
       <Image 
         source = {{uri: imageUrl}}
-        style = {{borderRadius: 99999, height: 180, width: 180}}
+        style = {{borderRadius: 99999, height: 180, width: 180, margin: 10}}
       />
     )
   }
