@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView } from "react-native";
+import { FlatList, SafeAreaView, Switch } from "react-native";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { TextInput } from "../../components/text-input";
@@ -13,7 +13,8 @@ import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
 import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
-import { useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import { useAddNewCollectionMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import AddPhotoButton from "../../components/add-photo-button/add-photo-button";
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -29,10 +30,32 @@ const Cook = ({ navigation }: CookProps) => {
     token: token
   }
   const { data, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
+  const [addNewCollection, {isSuccess: newCollectionSuccess }] = useAddNewCollectionMutation();
+  const [isVisible, setIsVisible] = useState(false);
+  const [titleValue, setTitleValue] = useState('');
+  const [descriptionValue, setDescriptionValue] = useState('');
+  const [isPrivateCollection, setIsPrivateCollection] = useState(false);
 
   const createCollection = function () {
     console.log("DATAAAAA ", data)
   }
+
+  const openNewCollectionModal = () =>{
+    setIsVisible(true);
+ }
+
+  const handleFormSubmit = async () => {
+    setIsVisible(false);
+  };
+
+  const togglePrivacy = () => {
+    setIsPrivateCollection(!isPrivateCollection);
+  }
+
+  const handleAddPhoto = () => {
+    // Implement your logic for adding a photo
+    console.log('Add photo button pressed');
+  };
 
   const {
       theme,
@@ -42,19 +65,100 @@ const Cook = ({ navigation }: CookProps) => {
 
     return (
    
-    <View>
-        <Text   
-        sx = {
-            {margin: 18,
-                textAlign: 'center'  
-            }} 
-            variant = "title">Let's inspire other cookers, {username}! 
-        </Text>
+    <View style={{ flex: 1 }}>
 
-        <Button sx={{margin: 10}}
-        onPress={ () => createCollection() }
-        title="Add collection"/>
+        <View style={{ flex: 1, backgroundColor: theme.colors.background2}}>
+          <View style={{  justifyContent: 'center', alignItems: 'center' }}>
+            <Text   
+            sx = {
+                {marginTop: 7 }} 
+                variant = "title">Let's inspire other cookers, {username}! 
+            </Text>
+          </View>
 
+            <View style={{  flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+             <View style={{  justifyContent: 'center', alignItems: 'center' }}>
+              <Button sx={{margin: 1}}
+              onPress={ () => openNewCollectionModal() }
+              title="Add collection"/>
+              </View>
+            </View>
+        </View>
+
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+
+        <View style={{  justifyContent: 'center', alignItems: 'center' }}>
+          <Button sx={{margin: 1}}
+          onPress={ () => createCollection() }
+          title="Add recipe"/>
+          </View>
+        </View>
+
+
+
+      <Modal visible={isVisible} animationType="slide" transparent>
+        <View style={styles().modalContainer}>
+          <View  style={styles().modalContent}>
+          
+            <Text 
+            variant="title"
+            sx={{marginBottom: 15, justifyContent: 'center'}}
+            >
+            Create your collection
+            </Text>
+
+            {/* <AddPhotoButton onPress={handleAddPhoto} /> */}
+
+              <TextInput
+                  label="Title"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onChangeText={(text) =>
+                      setTitleValue(text)
+              }/>
+
+              <TextInput
+                label="Description"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={(text) =>
+                    setDescriptionValue(text)
+              }/>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text sx={{ marginRight: 8 }} >{isPrivateCollection ? 'Private' : 'Public'}</Text>
+            <Switch
+              value={isPrivateCollection}
+              onValueChange={togglePrivacy}
+              thumbColor={isPrivateCollection ? 'pink' : '#f4f3f4'} // Pink when checked, default color when unchecked
+              trackColor={{ false: '#f4f3f4', true: 'lightpink' }} // Default color when unchecked, light pink when checked
+
+            />
+          </View>
+
+          <View style={{marginTop: 10,  alignItems: 'center'}} >
+          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+            <Button 
+            sx={{margin: 10}}
+            variant="primary"
+            onPress = { () => handleFormSubmit() } 
+            title="Submit" />
+    
+            <Button 
+            sx={{margin: 10}}
+            variant="primary"
+            onPress = { () => { setIsVisible(false);} } 
+            title="Close" />
+          </View>
+          </View>
+          
+          </View>
+        </View>
+      </Modal>
+
+       
     </View>
     )
 }
@@ -72,6 +176,8 @@ const styles = () => {
           padding: 20,
           borderRadius: 10,
           width: '80%',
+          justifyContent: 'center',
+          alignItems: 'center'
         },
         input: {
           borderWidth: 1,
@@ -79,6 +185,10 @@ const styles = () => {
           borderRadius: 5,
           padding: 10,
           marginBottom: 10,
+        },
+        buttonContainer: {
+          justifyContent: 'center',
+          alignItems: 'center',
         },
       })
     }

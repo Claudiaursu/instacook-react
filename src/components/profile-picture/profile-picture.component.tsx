@@ -70,7 +70,7 @@ export const PictureComponent = () => {
     return (
       <Image 
         source = {{uri: imageUrl}}
-        style = {{borderRadius: 99999, height: 180, width: 180, margin: 10}}
+        style = {{borderRadius: 99999, height: 190, width: 190, margin: 10}}
       />
     )
   }

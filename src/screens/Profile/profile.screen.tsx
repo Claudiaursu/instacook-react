@@ -199,7 +199,9 @@ const Profile = ({ navigation }: HomeProps) => {
       </View>
 
       <View style={{ marginTop: 7 }}>
+        <View style={{  justifyContent: 'center', alignItems: 'center'}}>
         <PictureComponent />
+        </View>
         <Button 
         sx={{margin: 10}}
         variant="primary"
