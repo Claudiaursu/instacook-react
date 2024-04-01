@@ -13,6 +13,7 @@ import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
 import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
+import { useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -20,6 +21,18 @@ const Cook = ({ navigation }: CookProps) => {
 
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.userData.username);
+  const loggedId = useSelector((state: RootState) => state.userData.loggedId);
+  const token = useSelector((state: RootState) => state.userData.token);
+
+  const userParams = {
+    id: loggedId,
+    token: token
+  }
+  const { data, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
+
+  const createCollection = function () {
+    console.log("DATAAAAA ", data)
+  }
 
   const {
       theme,
@@ -35,8 +48,12 @@ const Cook = ({ navigation }: CookProps) => {
             {margin: 18,
                 textAlign: 'center'  
             }} 
-            variant = "title">Hello {username}! 
+            variant = "title">Let's inspire other cookers, {username}! 
         </Text>
+
+        <Button sx={{margin: 10}}
+        onPress={ () => createCollection() }
+        title="Add collection"/>
 
     </View>
     )

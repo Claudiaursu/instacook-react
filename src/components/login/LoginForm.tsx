@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useState } from "react";
 import { SafeAreaView } from "react-native";
 import { View } from 'react-native'
 import loginStyles from "./Login.styles";
@@ -10,12 +10,14 @@ import { useLoginFormContext } from "../../store/login.context";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import React from "react";
 import { useDoLoginMutation } from '../../services/auth.service';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useDispatch } from "react-redux";
-import { updateToken, updateUsername } from "../../store/tokenSlice";
-import { selectProfilePhotoValue, setValue } from "../../store/profilePhoto.slice";
+import { updateToken, updateUsername, updateLoggedId } from "../../store/tokenSlice";
+import { setValue } from "../../store/profilePhoto.slice";
+import { decode } from "base-64";
+global.atob = decode;
+import { jwtDecode } from "jwt-decode";
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Login">;
@@ -51,6 +53,11 @@ export const LoginForm = ({navigation}: HomeProps) => {
         token = res.data.token;
         dispatch(updateToken(token))
         dispatch(updateUsername(username))
+
+        const decoded = jwtDecode(token) as any;
+        const userId = decoded.id || 0;
+
+        dispatch(updateLoggedId(parseInt(userId)));
 
         setLoginData({
           username:"",
