@@ -28,12 +28,6 @@ const Home = ({ navigation }: HomeProps) => {
       toggleThemeSchema
   } = useThemeConsumer();
 
-    //const [showForm, setShowForm] = useState(false);
-    // const handleButtonClick = () => {
-    //   setShowForm(true);
-    // };
-  
-
     return (
    
     <View>

@@ -20,9 +20,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import { TabViewProfile } from "../../components/tab-view-profile/tab-view-profile.component";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { SearchComponent } from "../../components/search/search.component";
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
+const Tab = createMaterialTopTabNavigator();
+
 
 const Profile = ({ navigation }: HomeProps) => {
 
@@ -113,12 +118,12 @@ const Profile = ({ navigation }: HomeProps) => {
   
     return (
    
-    <View>       
+    <View style={{ flex: 1 }}>       
       
       {/* Detalii cont + Poza  */}
-      <View style={{ flexDirection: 'row', backgroundColor: theme.colors.background2}}>
+      <View style={{ flexDirection: 'row', backgroundColor: theme.colors.background2 }}>
       
-      <View style={{ flex: 1,  marginTop: 7 }}>
+      <View style={{ flex: 1,  marginTop: 7, marginBottom: 7 }}>
 
       <View style={{ flexDirection: 'row', margin: 5}}>
       <MaterialCommunityIcons name="chef-hat" size={24} color={theme.colors.primary} />
@@ -224,6 +229,25 @@ const Profile = ({ navigation }: HomeProps) => {
       </View>
       
     </View>
+
+    
+      <View style={{ flex: 1, backgroundColor: theme.colors.background2 }} >
+
+      <Tab.Navigator
+      tabBarPosition="top"
+      tabBarOptions={{
+        style: { backgroundColor: theme.colors.background2 }, // Set background color here
+        indicatorStyle: { backgroundColor: theme.colors.primary }, // Optional: Customize tab indicator color
+        activeTintColor: theme.colors.primary, // Optional: Text color for active tab
+        inactiveTintColor: theme.colors.text, // Optional: Text color for inactive tabs
+      }}
+      >
+      <Tab.Screen name="Home" component={SearchComponent} />
+      <Tab.Screen name="Settings" component={SearchComponent} />
+      </Tab.Navigator>
+
+      </View>
+    
 
       <View>
       <Button 
