@@ -4,8 +4,8 @@ import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
 type CollectionProps = {
   titluColectie: string,
   descriereColectie: string,
-  publica: string,
-  calePoza: string,
+  publica: boolean,
+  calePoza?: string,
   utilizator: number
 }
 
@@ -23,7 +23,8 @@ type CollectionDto = {
 export const collectionSlice = createApi({
   reducerPath: "collections",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:3333/v1/collections",
+    //baseUrl: "http://192.168.100.46:3333/v1/collections",
+    baseUrl: "http://192.168.10.102:3333/v1/collections",
   }),
   tagTypes: ["Collections"],
   endpoints: (builder) => ({
@@ -35,11 +36,14 @@ export const collectionSlice = createApi({
         },
       }),
     }),
-    addNewCollection: builder.mutation<undefined, CollectionProps>({
-      query: (collection) => ({
+    addNewCollection: builder.mutation<undefined, { collection: CollectionProps, token: string} >({
+      query: ({collection, token}) => ({
         url: "/",
         method: "POST",
         body: collection,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }),
       invalidatesTags: ["Collections"],
     }),

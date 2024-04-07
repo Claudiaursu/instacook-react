@@ -36,8 +36,44 @@ const Cook = ({ navigation }: CookProps) => {
   const [descriptionValue, setDescriptionValue] = useState('');
   const [isPrivateCollection, setIsPrivateCollection] = useState(false);
 
-  const createCollection = function () {
-    console.log("DATAAAAA ", data)
+  const [newCollectionObj, setNewCollectionObj] = useState({
+    titluColectie: "",
+    descriereColectie: "",
+    publica: true
+  });
+
+  const profileRedirect = () => {
+    navigation.navigate("Profile"); // Navigate to Profile screen
+  };
+
+  const createCollection = async function () {
+    console.log("DATAAAAA ", newCollectionObj)
+
+    const collectionProps = {
+      ...newCollectionObj,
+      utilizator: loggedId
+    }
+    
+    try {
+
+      const collectionCreateParams = {
+        collection: collectionProps,
+        token
+      }
+      await addNewCollection(collectionCreateParams); 
+    
+    } catch (error) {
+      console.log("eoare creare colectie: ", error)
+    } 
+
+    setNewCollectionObj({
+      titluColectie: "",
+      descriereColectie: "",
+      publica: true
+    });
+
+    setIsVisible(false);
+    profileRedirect();
   }
 
   const openNewCollectionModal = () =>{
@@ -50,12 +86,30 @@ const Cook = ({ navigation }: CookProps) => {
 
   const togglePrivacy = () => {
     setIsPrivateCollection(!isPrivateCollection);
+    setNewCollectionObj({
+      ...newCollectionObj,
+      publica: isPrivateCollection
+    })
   }
 
   const handleAddPhoto = () => {
     // Implement your logic for adding a photo
     console.log('Add photo button pressed');
   };
+
+  const setTitluColectie = function (text: string) {
+    setNewCollectionObj({
+      ...newCollectionObj,
+      titluColectie: text
+    })
+  }
+
+  const setDescriereColectie = function (text: string) {
+    setNewCollectionObj({
+      ...newCollectionObj,
+      descriereColectie: text
+    })
+  }
 
   const {
       theme,
@@ -115,7 +169,7 @@ const Cook = ({ navigation }: CookProps) => {
                   autoCapitalize="none"
                   autoCorrect={false}
                   onChangeText={(text) =>
-                      setTitleValue(text)
+                    setTitluColectie(text)
               }/>
 
               <TextInput
@@ -124,11 +178,11 @@ const Cook = ({ navigation }: CookProps) => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 onChangeText={(text) =>
-                    setDescriptionValue(text)
+                  setDescriereColectie(text)
               }/>
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text sx={{ marginRight: 8 }} >{isPrivateCollection ? 'Private' : 'Public'}</Text>
+            <Text sx={{ marginRight: 8 }} >'Private</Text>
             <Switch
               value={isPrivateCollection}
               onValueChange={togglePrivacy}
@@ -143,14 +197,14 @@ const Cook = ({ navigation }: CookProps) => {
             <Button 
             sx={{margin: 10}}
             variant="primary"
-            onPress = { () => handleFormSubmit() } 
-            title="Submit" />
-    
+            onPress = { () => { setIsVisible(false);} } 
+            title="Close" />
+            
             <Button 
             sx={{margin: 10}}
             variant="primary"
-            onPress = { () => { setIsVisible(false);} } 
-            title="Close" />
+            onPress = { () => createCollection() } 
+            title="Submit" />
           </View>
           </View>
           

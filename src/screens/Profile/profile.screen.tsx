@@ -19,6 +19,7 @@ import { selectProfilePhotoValue, setValue } from "../../store/profilePhoto.slic
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
@@ -26,10 +27,23 @@ type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 const Profile = ({ navigation }: HomeProps) => {
 
     const username = useSelector((state: RootState) => state.userData.username);
+    const loggedId = useSelector((state: RootState) => state.userData.loggedId);
+    const token = useSelector((state: RootState) => state.userData.token);  
+   
     const dispatch = useDispatch();
     const { data, error, isLoading } = useGetUserByUsernameQuery(username);
     const [currentProfileVersion, setCurrentProfileVersion] = useState(1);
     const [profilePicText, setProfilePicText] = useState("Add profile photo");
+    
+
+    const getCollections = async function () {
+      const collectionParams = {
+        id: loggedId,
+        token: token
+      }
+      const { data, error, isLoading } = useGetCollectionsByUserIdQuery(collectionParams);
+
+    }
 
     const uploadImageAsync = async (uri: string) => {
       const blob: Blob = await new Promise((resolve, reject) => {
