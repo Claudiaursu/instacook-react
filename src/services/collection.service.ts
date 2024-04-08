@@ -9,15 +9,15 @@ type CollectionProps = {
   utilizator: number
 }
 
-type CollectionDto = {
+export type CollectionDto = {
   id: string,
   titluColectie: string,
   descriereColectie: string,
   publica: string,
   calePoza: string,
-  deletedAt: Timespan;
-  createdAt: Timespan;
-  updatedAt: Timespan;
+  deletedAt: number;
+  createdAt: number;
+  updatedAt: number;
 };
 
 export const collectionSlice = createApi({

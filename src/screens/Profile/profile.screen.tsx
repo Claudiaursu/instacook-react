@@ -102,8 +102,11 @@ const Profile = ({ navigation }: HomeProps) => {
     }
 
     useEffect(() => {
-      console.log("s-a schimbat poza......")
-      console.log("TeMa ", theme)
+      const collectionParams = {
+        id: loggedId,
+        token: token
+      }
+
   }, [currentProfileVersion])
 
     const {
@@ -231,7 +234,7 @@ const Profile = ({ navigation }: HomeProps) => {
     </View>
 
     
-      <View style={{ flex: 1, backgroundColor: theme.colors.background2 }} >
+      {/* <View style={{ flex: 1 }} >
 
       <Tab.Navigator
       tabBarPosition="top"
@@ -247,7 +250,9 @@ const Profile = ({ navigation }: HomeProps) => {
       </Tab.Navigator>
 
       </View>
-    
+     */}
+
+    <TabViewProfile/>
 
       <View>
       <Button 
