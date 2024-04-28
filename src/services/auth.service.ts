@@ -12,8 +12,8 @@ type LoginResult = {
 export const loginSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    //baseUrl: "http://192.168.100.46:8080/v1/auth",
-    baseUrl: "http://192.168.10.102:8080/v1/auth",
+    baseUrl: "http://192.168.100.46:8080/v1/auth",
+    //baseUrl: "http://192.168.10.102:8080/v1/auth",
   }),
   tagTypes: ["Login"],
   endpoints: (builder) => ({

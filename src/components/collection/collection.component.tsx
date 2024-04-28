@@ -10,7 +10,7 @@ import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export const CollectionComponent = ({ collection }: { collection: CollectionDto }) => {
+export const CollectionComponent = ({ collection, isOwner }: { collection: CollectionDto, isOwner: boolean}) => {
   const collectionDate = new Date(collection.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
 
@@ -58,26 +58,25 @@ export const CollectionComponent = ({ collection }: { collection: CollectionDto 
           </View>
         </View>
 
-        <View>
+        {isOwner && (
+          <View>
             <View>
-                <Button 
-                    sx={{margin: 10}}
-                    variant="primary"
-                    onPress = { () => {} } 
-                    title="Edit"/> 
+              <Button
+                sx={{ margin: 10 }}
+                variant="primary"
+                onPress={() => { }}
+                title="Edit" />
             </View>
             <View>
-
-            {/* <MaterialCommunityIcons name="trash-outline" size={24} color={theme.colors.primary} /> */}
-
-            <Button 
-            
-                sx={{margin: 10}}
+              {/* <MaterialCommunityIcons name="trash-outline" size={24} color={theme.colors.primary} /> */}
+              <Button
+                sx={{ margin: 10 }}
                 variant="primary"
-                onPress = { () => {} } 
-                title="Delete"/> 
+                onPress={() => { }}
+                title="Delete" />
             </View>
           </View>
+        )}
 
       </View>
     </View>

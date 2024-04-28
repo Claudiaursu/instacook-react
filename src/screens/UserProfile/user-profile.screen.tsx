@@ -10,7 +10,7 @@ import { StyleSheet } from "react-native";
 import uuid from 'react-native-uuid';
 import { Button } from "../../components/button";
 import { Text } from "../../components/text";
-import { useGetUserByUsernameQuery } from "../../services/user-interaction.service";
+import { useGetUserByIdQuery, useGetUserByUsernameQuery } from "../../services/user-interaction.service";
 import { useDispatch, useSelector } from "react-redux";
 import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
@@ -23,99 +23,40 @@ import { useGetCollectionsByUserIdQuery } from "../../services/collection.servic
 import { TabViewProfile } from "../../components/tab-view-profile/tab-view-profile.component";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { SearchComponent } from "../../components/search/search.component";
+import { SearchStackParamList } from "../Search/navigator.types";
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
 
 
-type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
+type UserProfileProps = NativeStackScreenProps<SearchStackParamList, "ProfileUser">;
 const Tab = createMaterialTopTabNavigator();
 
 
-const Profile = ({ navigation }: HomeProps) => {
+export const UserProfile = ({route, navigation}: {route: any, navigation: UserProfileProps}) => {
 
-    const username = useSelector((state: RootState) => state.userData.username);
     const loggedId = useSelector((state: RootState) => state.userData.loggedId);
     const token = useSelector((state: RootState) => state.userData.token);  
+    const { userId } = route.params;
+
+    console.log("userid primit",userId)
    
     const dispatch = useDispatch();
-    const { data, error, isLoading } = useGetUserByUsernameQuery(username);
-    const [currentProfileVersion, setCurrentProfileVersion] = useState(1);
-    const profilePhotoText = data?.pozaProfil === "profile_images/default.png" ? "Add photo" : "Edit photo"
-
-    const getCollections = async function () {
-      const collectionParams = {
-        id: loggedId,
-        token: token
-      }
-      const { data, error, isLoading } = useGetCollectionsByUserIdQuery(collectionParams);
-    }
-
-    const uploadImageAsync = async (uri: string) => {
-      const blob: Blob = await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.onload = function () {
-            resolve(xhr.response);
-          };
-          xhr.onerror = function (e) {
-            console.log(e);
-            reject(new TypeError("Network request failed"));
-          };
-          xhr.responseType = "blob";
-          xhr.open("GET", uri, true);
-          xhr.send(null);
-      })
-
-      const imgPath = `${username}/profile_image.jpg`;
-      const fileRef = ref(getStorage(), imgPath);
-
-      try {
-        const metadata = {
-          contentType: 'image/jpeg'
-        };
-        
-        const result = await uploadBytesResumable(fileRef, blob, metadata);
-        dispatch(setValue(imgPath))
-        setCurrentProfileVersion(currentProfileVersion + 1);
-        return await getDownloadURL(fileRef);
-
-      } catch (error) {
-        console.log("ERROOOOOOOR ", error)
-      }
-  }
-
-    const uploadPhoto = async function () {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-  
-      console.log(result);
-  
-      if (!result.canceled) {
-          console.log("imagine ", result.assets[0])
-          //setImage(result.assets[0].uri);
-          await uploadImageAsync(result.assets[0].uri);
-      }
-    }
+    
+    
+    const { data, error, isLoading } = useGetUserByIdQuery({
+      id: userId, 
+      token
+    });
 
     useEffect(() => {
-      const collectionParams = {
-        id: loggedId,
-        token: token
-      }
+      console.log("ciuciu  ", data)
 
-  }, [currentProfileVersion])
+  }, [userId])
 
     const {
         theme,
         activeScheme,
         toggleThemeSchema
     } = useThemeConsumer();
- 
-    const logout = () => {
-      dispatch(updateToken(""))
-    }
   
     return (
    
@@ -133,7 +74,7 @@ const Profile = ({ navigation }: HomeProps) => {
           {
               textAlign: 'left'  
           }} 
-          variant = "profileTitle">{username}
+          variant = "profileTitle">{data?.username}
       </Text>
       </View>
 
@@ -218,50 +159,24 @@ const Profile = ({ navigation }: HomeProps) => {
         
       </View>
 
-      <View style={{ marginTop: 7 }}>
+      <View style={{ marginTop: 7, justifyContent: 'center', alignItems: 'center'}}>
         <View style={{  justifyContent: 'center', alignItems: 'center'}}>
-        <UserPictureComponent photoPath={data?.pozaProfil || ''}/>
+        <UserPictureComponent photoPath={data?.pozaProfil || 'profile_images/default.png'}/>
         </View>
 
         <View>
           <Button 
           sx={{margin: 10}}
           variant="primary"
-          onPress = { () => uploadPhoto() } 
-          title={profilePhotoText} />
+          onPress = { () => {} } 
+          title="Follow"/>
         </View>
       </View>
       
     </View>
 
-    
-      {/* <View style={{ flex: 1 }} >
+    <TabViewProfile userId={userId}/>
 
-      <Tab.Navigator
-      tabBarPosition="top"
-      tabBarOptions={{
-        style: { backgroundColor: theme.colors.background2 }, // Set background color here
-        indicatorStyle: { backgroundColor: theme.colors.primary }, // Optional: Customize tab indicator color
-        activeTintColor: theme.colors.primary, // Optional: Text color for active tab
-        inactiveTintColor: theme.colors.text, // Optional: Text color for inactive tabs
-      }}
-      >
-      <Tab.Screen name="Home" component={SearchComponent} />
-      <Tab.Screen name="Settings" component={SearchComponent} />
-      </Tab.Navigator>
-
-      </View>
-     */}
-
-    <TabViewProfile userId={loggedId}/>
-
-      <View>
-      <Button 
-        sx={{margin: 10}}
-        variant="primary"
-        onPress = { () => logout() } 
-        title="Sign out"/> 
-      </View>
 
     </View>
     )
@@ -295,4 +210,4 @@ const styles = () => {
       })
     }
 
-export default Profile;
+export default UserProfile;

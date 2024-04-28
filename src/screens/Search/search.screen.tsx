@@ -1,23 +1,19 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView } from "react-native";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
-import { TextInput } from "../../components/text-input";
-import { View, Modal } from 'react-native';
 import { StyleSheet } from "react-native";
-import uuid from 'react-native-uuid';
-import { Button } from "../../components/button";
-import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
-import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
+import { SearchComponent } from "../../components/search/search.component";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import UserProfile from "../UserProfile";
+import { SearchStackParamList } from "./navigator.types";
 
-type SearchProps = NativeStackScreenProps<RootStackParamList, "Search">;
+const Stack = createNativeStackNavigator<SearchStackParamList>();
 
-const Search = ({ navigation }: SearchProps) => {
-
+export const Search = () => {
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.userData.username);
 
@@ -28,18 +24,17 @@ const Search = ({ navigation }: SearchProps) => {
   } = useThemeConsumer();  
 
     return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="SearchUser" component={SearchComponent} />
+          <Stack.Screen name="ProfileUser" component={UserProfile} />
+        </Stack.Navigator>
+    );
    
-    <View>
-        <Text   
-        sx = {
-            {margin: 18,
-                textAlign: 'center'  
-            }} 
-            variant = "title">Hello {username}! 
-        </Text>
-
-    </View>
-    )
+    // <View>      
+    //   {/* asa mergea pana acum: */}
+    //   {/* <SearchComponent/> */}
+    // </View>
+    // );
 }
 
 const styles = () => {

@@ -10,7 +10,7 @@ type UrmarireDto = {
   updatedAt: Timespan;
 }
 
-type UserDto = {
+export type UserDto = {
   id: string,
   username: string;
   nume: string;
@@ -18,6 +18,7 @@ type UserDto = {
   parola: string;
   email: string;
   taraOrigine: string;
+  pozaProfil: string;
   telefon: string;
   totalPuncte: number;
   followers: UrmarireDto[];
@@ -27,7 +28,7 @@ type UserDto = {
   updatedAt: Timespan;
 };
 
-type UserProps = {
+export type UserProps = {
   username: string;
   nume: string;
   prenume: string;
@@ -41,13 +42,24 @@ type UserProps = {
 export const userInteractionSlice = createApi({
   reducerPath: "userInteraction",
   baseQuery: fetchBaseQuery({
-    //baseUrl: "http://192.168.100.46:9083/v1/users",
-    baseUrl: "http://192.168.10.102:9083/v1/users",
+    baseUrl: "http://192.168.100.46:9083/v1/users",
+    //baseUrl: "http://192.168.10.102:9083/v1/users",
   }),
   tagTypes: ["Users"],
   endpoints: (builder) => ({
+    getUserById: builder.query<UserDto, { id: number,  token: string}>({
+      query: ({ id, token }) => ({
+        url: `/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
     getUserByUsername: builder.query<UserDto, string>({
       query: (username) => `/username/${username}`,
+    }),
+    getUsersBySearch: builder.query<UserDto[], string>({
+      query: (query) => `/search/${query}`,
     }),
     addNewUser: builder.mutation<undefined, UserProps>({
       query: (post) => ({
@@ -60,4 +72,9 @@ export const userInteractionSlice = createApi({
   }),
 });
 
-export const { useAddNewUserMutation, useGetUserByUsernameQuery } = userInteractionSlice
+export const { 
+  useAddNewUserMutation, 
+  useGetUserByUsernameQuery,
+  useGetUsersBySearchQuery,
+  useGetUserByIdQuery 
+} = userInteractionSlice

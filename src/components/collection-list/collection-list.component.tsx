@@ -6,16 +6,20 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { ICollection } from "../../interfaces/collection";
 
-const CollectionList = () => {
-  const renderItem = ({ item }: { item: CollectionDto }) => (
-    <CollectionComponent collection={item} />
-  );
-
+const CollectionList = ({ userId }: {userId: number}) => {
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token); 
   
+  const renderItem = ({ item }: { item: CollectionDto }) => {
+    let isOwner = false;
+    if (loggedId === userId) {
+      isOwner = true;
+    }  
+    return <CollectionComponent collection={item} isOwner={isOwner}/>
+  };
+
   const collectionParams = {
-    id: loggedId,
+    id: userId,
     token: token
   }
   const { data, error, isLoading } = useGetCollectionsByUserIdQuery(collectionParams);
