@@ -49,4 +49,20 @@ export const buttonVariants = (
       color: colors.invertTextButton,
     },
   },
+  profile: {
+    container: {
+      borderRadius: 20,
+      backgroundColor: colors.primary,
+      justifyContent: "center",
+      alignSelf: 'flex-start',
+      alignItems: "center",
+      height: 36,
+      width: 120
+    },
+    text: {
+      color: colors.textButton,
+      margin: 8,
+      fontSize: 16
+    },
+  },
 });

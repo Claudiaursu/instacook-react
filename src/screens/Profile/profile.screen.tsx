@@ -24,6 +24,7 @@ import { TabViewProfile } from "../../components/tab-view-profile/tab-view-profi
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { SearchComponent } from "../../components/search/search.component";
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
+import { useGetRecipesByUserIdQuery } from "../../services/recipe.service";
 
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
@@ -37,17 +38,12 @@ const Profile = ({ navigation }: HomeProps) => {
     const token = useSelector((state: RootState) => state.userData.token);  
    
     const dispatch = useDispatch();
-    const { data, error, isLoading } = useGetUserByUsernameQuery(username);
-    const [currentProfileVersion, setCurrentProfileVersion] = useState(1);
-    const profilePhotoText = data?.pozaProfil === "profile_images/default.png" ? "Add photo" : "Edit photo"
+    const { data: userData, error: userError, isLoading: userLoading } = useGetUserByUsernameQuery(username);
+    const { data: recipesData, error: recipesError, isLoading: recipesLoading } = useGetRecipesByUserIdQuery({ id: loggedId, token });
 
-    const getCollections = async function () {
-      const collectionParams = {
-        id: loggedId,
-        token: token
-      }
-      const { data, error, isLoading } = useGetCollectionsByUserIdQuery(collectionParams);
-    }
+    const profilePhotoText = userData?.pozaProfil === "profile_images/default.png" ? "Add photo" : "Edit photo"
+    const recipeCount = recipesData ? recipesData.length: 0;
+
 
     const uploadImageAsync = async (uri: string) => {
       const blob: Blob = await new Promise((resolve, reject) => {
@@ -74,7 +70,6 @@ const Profile = ({ navigation }: HomeProps) => {
         
         const result = await uploadBytesResumable(fileRef, blob, metadata);
         dispatch(setValue(imgPath))
-        setCurrentProfileVersion(currentProfileVersion + 1);
         return await getDownloadURL(fileRef);
 
       } catch (error) {
@@ -93,19 +88,15 @@ const Profile = ({ navigation }: HomeProps) => {
       console.log(result);
   
       if (!result.canceled) {
-          console.log("imagine ", result.assets[0])
           //setImage(result.assets[0].uri);
           await uploadImageAsync(result.assets[0].uri);
       }
     }
 
-    useEffect(() => {
-      const collectionParams = {
-        id: loggedId,
-        token: token
-      }
 
-  }, [currentProfileVersion])
+    useEffect(() => {
+
+  }, [loggedId])
 
     const {
         theme,
@@ -142,7 +133,7 @@ const Profile = ({ navigation }: HomeProps) => {
           margin: 5,
           textAlign: 'left'
         }}
-        variant="subtitle"> {data?.nume} {data?.prenume}
+        variant="subtitle"> {userData?.nume} {userData?.prenume}
       </Text>
 
       <Text
@@ -150,7 +141,7 @@ const Profile = ({ navigation }: HomeProps) => {
           margin: 5,
           textAlign: 'left'
         }}
-        variant="subtitle"> {data?.email}
+        variant="subtitle"> {userData?.email}
       </Text>
 
       <Text
@@ -158,7 +149,7 @@ const Profile = ({ navigation }: HomeProps) => {
           margin: 5,
           textAlign: 'left'
         }}
-        variant="subtitle"> {data?.taraOrigine}
+        variant="subtitle"> {userData?.taraOrigine}
       </Text>
 
        {/* Nr Retete + Followers + Follows  */}
@@ -176,7 +167,7 @@ const Profile = ({ navigation }: HomeProps) => {
             margin: 5,
             textAlign: 'center'
           }}
-          variant="subtitle"> {data?.followers.length}
+          variant="subtitle"> {userData?.followers.length}
         </Text>
         </View>
 
@@ -193,7 +184,7 @@ const Profile = ({ navigation }: HomeProps) => {
               margin: 5,
               textAlign: 'center'
             }}
-            variant="subtitle"> {data?.follows.length}
+            variant="subtitle"> {userData?.follows.length}
           </Text>
         </View>
 
@@ -210,7 +201,7 @@ const Profile = ({ navigation }: HomeProps) => {
               margin: 5,
               textAlign: 'center'
             }}
-            variant="subtitle"> {data?.follows.length}
+            variant="subtitle"> {recipeCount}
           </Text>
         </View>
 
@@ -220,38 +211,19 @@ const Profile = ({ navigation }: HomeProps) => {
 
       <View style={{ marginTop: 7 }}>
         <View style={{  justifyContent: 'center', alignItems: 'center'}}>
-        <UserPictureComponent photoPath={data?.pozaProfil || ''}/>
+        <UserPictureComponent photoPath={userData?.pozaProfil || ''}/>
         </View>
 
         <View>
-          <Button 
+        <Button 
           sx={{margin: 10}}
-          variant="primary"
+          variant="profile"
           onPress = { () => uploadPhoto() } 
           title={profilePhotoText} />
         </View>
       </View>
       
     </View>
-
-    
-      {/* <View style={{ flex: 1 }} >
-
-      <Tab.Navigator
-      tabBarPosition="top"
-      tabBarOptions={{
-        style: { backgroundColor: theme.colors.background2 }, // Set background color here
-        indicatorStyle: { backgroundColor: theme.colors.primary }, // Optional: Customize tab indicator color
-        activeTintColor: theme.colors.primary, // Optional: Text color for active tab
-        inactiveTintColor: theme.colors.text, // Optional: Text color for inactive tabs
-      }}
-      >
-      <Tab.Screen name="Home" component={SearchComponent} />
-      <Tab.Screen name="Settings" component={SearchComponent} />
-      </Tab.Navigator>
-
-      </View>
-     */}
 
     <TabViewProfile userId={loggedId}/>
 

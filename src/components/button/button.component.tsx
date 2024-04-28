@@ -8,7 +8,7 @@ import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Text } from "../text";
 import { buttonVariants } from "./button.variants";
 
-export type ButtonVariants = "primary" | "secondary" | "tertiary";
+export type ButtonVariants = "primary" | "secondary" | "tertiary" | "profile";
 interface ButtonProps extends NativeButtonProps {
   sx?: ViewStyle;
   variant?: ButtonVariants;
