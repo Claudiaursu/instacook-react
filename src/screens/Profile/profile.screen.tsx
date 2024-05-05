@@ -95,8 +95,8 @@ const Profile = ({ navigation }: HomeProps) => {
 
 
     useEffect(() => {
-
-  }, [loggedId])
+      console.log(">>>>>>", userData)
+  }, [userData])
 
     const {
         theme,

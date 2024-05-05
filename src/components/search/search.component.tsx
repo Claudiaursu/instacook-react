@@ -8,10 +8,7 @@ import { View, FlatList, Dimensions } from 'react-native';
 import { useEffect, useState } from "react";
 import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { selectProfilePhotoValue, setValue } from '../../store/profilePhoto.slice';
-import { storage } from '../../utils/firebase/firebase';
 import { RootState, store } from '../../store/store';
-import { Text } from '../text';
 import React from 'react';
 import { TextInput } from '../text-input';
 import { UserDto, useGetUsersBySearchQuery } from '../../services/user-interaction.service';
@@ -28,10 +25,20 @@ export const SearchComponent = ({navigation}: SearchComponentProps) => {
   const token = useSelector((state: RootState) => state.userData.token); 
   const [query, setQuery] = useState("");
 
-  let { data, error, isLoading } = useGetUsersBySearchQuery(query);
+  let [filteredUsers2, setFilteredUsers2] = useState<UserDto[]>([]);
+
+  let { data: filteredUsers, error, isLoading } = useGetUsersBySearchQuery(query);
 
   useEffect(() => {
-  }, [])
+
+    if (query.length === 0) {
+      setFilteredUsers2([]);
+    } else {
+      const filtered = filteredUsers ?.filter(user => parseInt(user.id) != loggedId)
+      setFilteredUsers2(filtered || [])
+    }
+    
+  }, [query])
 
   const {
     theme,
@@ -40,11 +47,9 @@ export const SearchComponent = ({navigation}: SearchComponentProps) => {
   } = useThemeConsumer();
 
 
-    const handleSearch = async (searchQuery: string) => {
-      setQuery(searchQuery);
-      if (searchQuery.length === 0) {
-        data = []
-      }
+    const handleSearch = (searchQuery: string) => {
+      setQuery(searchQuery)
+      console.log("din handleSearch", searchQuery);
     }
 
     const renderItem = ({ item }: { item: UserDto }) => {
@@ -76,7 +81,7 @@ export const SearchComponent = ({navigation}: SearchComponentProps) => {
       </View>
 
       <FlatList
-        data={data as UserDto[] | undefined}
+        data={filteredUsers2 as UserDto[] | undefined}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
       />
@@ -84,8 +89,6 @@ export const SearchComponent = ({navigation}: SearchComponentProps) => {
     </View>
                
     </Provider>
-     
-      
   )
 
 };

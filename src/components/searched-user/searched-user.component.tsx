@@ -27,6 +27,7 @@ export const SearchedUserComponent = (
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token); 
 
+  const loggedUserFlag = loggedId === parseInt(user.id);
 
   useEffect(() => {
   }, [])
@@ -41,12 +42,6 @@ export const SearchedUserComponent = (
     return (
       <TouchableOpacity onPress={onPress}>
       <View style={styles.container}>
-        {/* <Image
-          source={{ uri: user.profilePic }}
-          style={styles.profilePic}
-        />
-         */}
-
         <Text
         sx={{
           margin: 5,

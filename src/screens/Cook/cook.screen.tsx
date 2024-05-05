@@ -14,11 +14,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
 import { useAddNewCollectionMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
-import AddPhotoButton from "../../components/add-photo-button/add-photo-button";
-import { useNavigation } from "@react-navigation/native";
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
-
 
 const Cook = ({ navigation }: CookProps) => {
 
