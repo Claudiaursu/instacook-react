@@ -6,13 +6,19 @@ import { View } from 'react-native';
 import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import CollectionList from '../collection-list/collection-list.component';
 import RecipeList from '../recipe-list/recipe-list.component';
+import { TabViewProfileParamList } from './tab-view-profile.types';
+import { useNavigation } from '@react-navigation/native';
 
-const Tab = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator<TabViewProfileParamList>();
 
-export const TabViewProfile = ({ userId }: {userId: number}) => {
+export const TabViewProfile = ({ userId, refresh }: {userId: number, refresh: number}) => {
   const insets = useSafeAreaInsets();
 
   const { theme } = useThemeConsumer();
+
+  
+
+  console.log("refresh in tabview primit: ", refresh)
 
   return (
     <View style={{ flex: 1 }}>
@@ -28,11 +34,15 @@ export const TabViewProfile = ({ userId }: {userId: number}) => {
         {/* Pass userId as a param to CollectionList */}
         <Tab.Screen
           name="Collections"
-          component={() => <CollectionList userId={userId} />} // Pass userId as a prop
+          children={()=><CollectionList userId={userId} refresh={refresh}/>}
+
+          //component={CollectionList} // Directly pass the component reference
+          //component={() => <CollectionList userId={userId} refresh={refresh} />} // Use a function to pass updated props
         />
         <Tab.Screen
           name="Recipes"
-          component={() => <RecipeList userId={userId} />} // Pass userId as a prop
+          component={RecipeList} // Directly pass the component reference
+          initialParams={{ userId }}
         />
       </Tab.Navigator>
     </View>

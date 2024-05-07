@@ -4,10 +4,15 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { RecipeDto, useGetRecipesByUserIdQuery } from '../../services/recipe.service';
 import RecipeComponent from '../recipe/recipe.component';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { TabViewProfileParamList } from '../tab-view-profile/tab-view-profile.types';
 
-const RecipeList = ({ userId }: { userId: number }) => {
+type RecipeListProps = NativeStackScreenProps<TabViewProfileParamList, "Recipes">;
+
+const RecipeList = ({  route, navigation }: {  route: any; navigation: RecipeListProps; }) => {
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token);
+  const { userId } = route.params;
 
   const { data, error, isLoading } = useGetRecipesByUserIdQuery({ id: userId, token });
 

@@ -13,7 +13,9 @@ import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
 import { updateToken } from "../../store/tokenSlice";
 import { RootState } from "../../store/store";
-import { useAddNewCollectionMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import * as ImagePicker from 'expo-image-picker';
+import { useAddNewCollectionMutation, useDeleteCollectionByIdMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -30,6 +32,7 @@ const Cook = ({ navigation }: CookProps) => {
   }
   const { data, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
   const [addNewCollection, {isSuccess: newCollectionSuccess }] = useAddNewCollectionMutation();
+  
   const [isVisible, setIsVisible] = useState(false);
   const [titleValue, setTitleValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
@@ -38,14 +41,13 @@ const Cook = ({ navigation }: CookProps) => {
   const [newCollectionObj, setNewCollectionObj] = useState({
     titluColectie: "",
     descriereColectie: "",
-    publica: true
+    publica: true,
+    calePoza: ""
   });
 
 
-  const profileRedirect = () => {
-    navigation.navigate("Profile"); // Navigate to Profile screen
-    //navigator.navigate('Profile', { refresh: true }); // Pass refresh flag as a param
-
+  const profileRedirect = (id: number) => {
+    navigation.navigate("Profile", {refresh: id }); // Navigate to Profile screen
   };
 
   const createCollection = async function () {
@@ -62,20 +64,24 @@ const Cook = ({ navigation }: CookProps) => {
         collection: collectionProps,
         token
       }
-      await addNewCollection(collectionCreateParams); 
-    
+      const response: { data?: { id: string }; error?: any } = await addNewCollection(collectionCreateParams); // Adjust the type accordingly
+      if (response && response.data && response.data.id) {
+        console.log("response RESULT ", response.data)
+        profileRedirect(parseInt(response.data.id))
+      }
     } catch (error) {
       console.log("eoare creare colectie: ", error)
     } 
 
+  
     setNewCollectionObj({
       titluColectie: "",
       descriereColectie: "",
-      publica: true
+      publica: true,
+      calePoza: ""
     });
 
     setIsVisible(false);
-    profileRedirect();
   }
 
   const openNewCollectionModal = () =>{
@@ -94,11 +100,6 @@ const Cook = ({ navigation }: CookProps) => {
     })
   }
 
-  const handleAddPhoto = () => {
-    // Implement your logic for adding a photo
-    console.log('Add photo button pressed');
-  };
-
   const setTitluColectie = function (text: string) {
     setNewCollectionObj({
       ...newCollectionObj,
@@ -113,10 +114,58 @@ const Cook = ({ navigation }: CookProps) => {
     })
   }
 
+
+  const uploadImageAsync = async (uri: string) => {
+    const blob: Blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", uri, true);
+        xhr.send(null);
+    })
+
+    const collName = newCollectionObj.titluColectie;
+    const imgPath = `${username}/${collName}/coll-pic.jpg`;
+    const fileRef = ref(getStorage(), imgPath);
+
+    try {
+      const metadata = {
+        contentType: 'image/jpeg'
+      };
+      
+      const result = await uploadBytesResumable(fileRef, blob, metadata);
+      //dispatch(setValue(imgPath))
+      //return await getDownloadURL(fileRef);
+
+    } catch (error) {
+      console.log("ERROOOOOOOR ", error)
+    }
+  }
+
+  const addCollectionPhoto = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+        //setImage(result.assets[0].uri);
+        await uploadImageAsync(result.assets[0].uri);
+    }
+  }
+
   const {
-      theme,
-      activeScheme,
-      toggleThemeSchema
+      theme
   } = useThemeConsumer();  
 
     return (
@@ -184,7 +233,7 @@ const Cook = ({ navigation }: CookProps) => {
               }/>
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text sx={{ marginRight: 8 }} >'Private</Text>
+            <Text sx={{ marginRight: 8 }} >Private</Text>
             <Switch
               value={isPrivateCollection}
               onValueChange={togglePrivacy}
@@ -192,6 +241,14 @@ const Cook = ({ navigation }: CookProps) => {
               trackColor={{ false: '#f4f3f4', true: 'lightpink' }} // Default color when unchecked, light pink when checked
 
             />
+          </View>
+
+          <View>
+          <Button 
+            sx={{margin: 10}}
+            variant="primary"
+            onPress = { () => addCollectionPhoto() } 
+            title="Add collection photo" />
           </View>
 
           <View style={{marginTop: 10,  alignItems: 'center'}} >

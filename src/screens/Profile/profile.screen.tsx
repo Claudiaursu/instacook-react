@@ -31,12 +31,17 @@ type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 const Tab = createMaterialTopTabNavigator();
 
 
-const Profile = ({ navigation }: HomeProps) => {
+const Profile = ({ route, navigation }: {route: any, navigation: HomeProps}) => {
 
     const username = useSelector((state: RootState) => state.userData.username);
     const loggedId = useSelector((state: RootState) => state.userData.loggedId);
     const token = useSelector((state: RootState) => state.userData.token);  
-   
+    const { refresh } = route.params;
+
+    const [refreshUnicity, setRefreshUnicity] = useState(refresh);
+
+    console.log("refresh primit ca param", refresh)
+
     const dispatch = useDispatch();
     const { data: userData, error: userError, isLoading: userLoading } = useGetUserByUsernameQuery(username);
     const { data: recipesData, error: recipesError, isLoading: recipesLoading } = useGetRecipesByUserIdQuery({ id: loggedId, token });
@@ -75,7 +80,7 @@ const Profile = ({ navigation }: HomeProps) => {
       } catch (error) {
         console.log("ERROOOOOOOR ", error)
       }
-  }
+    }
 
     const uploadPhoto = async function () {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -88,15 +93,14 @@ const Profile = ({ navigation }: HomeProps) => {
       console.log(result);
   
       if (!result.canceled) {
-          //setImage(result.assets[0].uri);
           await uploadImageAsync(result.assets[0].uri);
       }
     }
 
-
     useEffect(() => {
-      console.log(">>>>>>", userData)
-  }, [userData])
+      setRefreshUnicity(refresh)
+      console.log(refresh, "!")
+  }, [userData, refresh])
 
     const {
         theme,
@@ -225,7 +229,7 @@ const Profile = ({ navigation }: HomeProps) => {
       
     </View>
 
-    <TabViewProfile userId={loggedId}/>
+    <TabViewProfile userId={loggedId} refresh={refresh}/>
 
       <View>
       <Button 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Text } from '../../components/text';
-import { CollectionDto } from '../../services/collection.service';
+import { CollectionDto, useDeleteCollectionByIdMutation } from '../../services/collection.service';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { storage } from '../../utils/firebase/firebase';
 import { useSelector } from 'react-redux';
@@ -10,15 +10,29 @@ import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export const CollectionComponent = ({ collection, isOwner }: { collection: CollectionDto, isOwner: boolean}) => {
+export const CollectionComponent = ({
+  collection,
+  isOwner,
+  handleDeleteUpdates,
+}: {
+  collection: CollectionDto;
+  isOwner: boolean;
+  handleDeleteUpdates: any;
+}) => {
   const collectionDate = new Date(collection.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
+  const token = useSelector((state: RootState) => state.userData.token);
 
-  const [imageUrl, setImageUrl] = useState('');
+  const [deleteCollectionById, { isSuccess: deleteCollectionSuccess }] =
+    useDeleteCollectionByIdMutation();
+
+  const [imageUrl, setImageUrl] = useState("");
+
+  const { theme, activeScheme, toggleThemeSchema } = useThemeConsumer();
 
   useEffect(() => {
     const getPicture = async () => {
-      const path = `${username}/collections/${collection.id}.png`;
+      const path = collection.calePoza;
       const imgRef = ref(storage, path);
       const imgUrl = await getDownloadURL(imgRef);
       setImageUrl(imgUrl);
@@ -27,57 +41,84 @@ export const CollectionComponent = ({ collection, isOwner }: { collection: Colle
     getPicture();
   }, [collection.id, username]);
 
-    const {
-        theme,
-        toggleThemeSchema,
-        activeScheme
-    } = useThemeConsumer();
+  const deleteCollection = async () => {
+    const collectionDeleteParams = {
+      id: collection.id,
+      token,
+    };
+    try {
+      await deleteCollectionById(collectionDeleteParams);
+      handleDeleteUpdates(collection.id);
+    } catch (error) {
+      console.log("ERROR ", error);
+    }
+  };
 
   return (
     <View style={styles(activeScheme).container}>
       <View style={styles(activeScheme).card}>
         <Text variant="subtitle">{collection.titluColectie}</Text>
-        
+
         <View style={styles(activeScheme).contentContainer}>
           {/* Image */}
-          <View style = {{ alignItems: 'center'}}>
-          <Image source={{ uri: imageUrl }} style={styles(activeScheme).image} />
+          <View style={{ alignItems: "center" }}>
+            {imageUrl && (
+              <Image
+                source={{ uri: imageUrl }}
+                style={styles(activeScheme).image}
+              />
+            )}
+
+            {!imageUrl && (
+              <MaterialCommunityIcons
+                name="chef-hat"
+                size={50}
+                color={theme.colors.primary}
+              />
+            )}
+
+            {/* <Image source={{ uri: imageUrl }} style={styles(activeScheme).image} /> */}
           </View>
 
           <View style={styles(activeScheme).textContainer}>
-            <Text variant="technicalText" numberOfLines={5} sx = {{ marginBottom: 5 }}>
+            <Text
+              variant="technicalText"
+              numberOfLines={5}
+              sx={{ marginBottom: 5 }}
+            >
               {collection.descriereColectie}
             </Text>
-            <Text variant="technicalText" sx = {{ marginBottom: 5 }}>
+            <Text variant="technicalText" sx={{ marginBottom: 5 }}>
               Created at: {collectionDate.toLocaleString()}
             </Text>
 
-            <Text variant="technicalText" sx = {{ marginBottom: 5 }}>
+            <Text variant="technicalText" sx={{ marginBottom: 5 }}>
               Recipes: 0
             </Text>
           </View>
         </View>
 
         {isOwner && (
-          <View>
+          <View style={{ flexDirection: "row" }}>
             <View>
               <Button
-                sx={{ margin: 10 }}
+                sx={{ marginLeft: 5, marginRight: 5 }}
                 variant="primary"
-                onPress={() => { }}
-                title="Edit" />
+                onPress={() => {}}
+                title="Edit"
+              />
             </View>
             <View>
               {/* <MaterialCommunityIcons name="trash-outline" size={24} color={theme.colors.primary} /> */}
               <Button
-                sx={{ margin: 10 }}
+                sx={{ marginLeft: 5, marginRight: 5 }}
                 variant="primary"
-                onPress={() => { }}
-                title="Delete" />
+                onPress={deleteCollection}
+                title="Delete"
+              />
             </View>
           </View>
         )}
-
       </View>
     </View>
   );

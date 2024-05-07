@@ -240,7 +240,7 @@ export const UserProfile = ({
         </View>
       </View>
 
-      <TabViewProfile userId={userId} />
+      <TabViewProfile userId={userId} refresh={1} />
     </View>
   );
 };

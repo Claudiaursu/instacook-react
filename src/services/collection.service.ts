@@ -27,6 +27,7 @@ export const collectionSlice = createApi({
     //baseUrl: "http://192.168.10.102:3333/v1/collections",
   }),
   tagTypes: ["Collections"],
+  refetchOnFocus: true,
   endpoints: (builder) => ({
     getCollectionsByUserId: builder.query<CollectionDto[], { id: number,  token: string}>({
       query: ({ id, token }) => ({
@@ -35,6 +36,9 @@ export const collectionSlice = createApi({
           Authorization: `Bearer ${token}`,
         },
       }),
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg
+      }
     }),
     addNewCollection: builder.mutation<undefined, { collection: CollectionProps, token: string} >({
       query: ({collection, token}) => ({
@@ -47,7 +51,21 @@ export const collectionSlice = createApi({
       }),
       invalidatesTags: ["Collections"],
     }),
+    deleteCollectionById: builder.mutation<undefined, { id: string, token: string }>({
+      query: ({ id, token }) => ({
+        url: `/${id}`,
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Collections"],
+    }),
   }),
 });
 
-export const { useAddNewCollectionMutation, useGetCollectionsByUserIdQuery } = collectionSlice;
+export const { 
+  useAddNewCollectionMutation, 
+  useGetCollectionsByUserIdQuery,
+  useDeleteCollectionByIdMutation
+} = collectionSlice;
