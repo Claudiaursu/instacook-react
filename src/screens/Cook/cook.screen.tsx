@@ -143,6 +143,11 @@ const Cook = ({ navigation }: CookProps) => {
       //dispatch(setValue(imgPath))
       //return await getDownloadURL(fileRef);
 
+      setNewCollectionObj({
+        ...newCollectionObj,
+        calePoza: imgPath
+      })
+
     } catch (error) {
       console.log("ERROOOOOOOR ", error)
     }

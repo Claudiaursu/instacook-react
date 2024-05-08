@@ -4,10 +4,6 @@ import { CollectionComponent } from "../collection/collection.component";
 import { CollectionDto, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { ICollection } from "../../interfaces/collection";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { TabViewProfileParamList } from "../tab-view-profile/tab-view-profile.types";
-import { useFocusEffect } from "@react-navigation/native";
 
 
 const CollectionList = ({userId, refresh}: {userId:number, refresh:number}) => {
@@ -55,7 +51,7 @@ const CollectionList = ({userId, refresh}: {userId:number, refresh:number}) => {
 
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16 }}>
+    <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
       <FlatList
         data={collectionDataList as CollectionDto[] | undefined} // Type assertion here
         renderItem={renderItem}

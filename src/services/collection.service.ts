@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
+import { RecipeDto } from "./recipe.service";
 
 type CollectionProps = {
   titluColectie: string,
@@ -15,6 +16,7 @@ export type CollectionDto = {
   descriereColectie: string,
   publica: string,
   calePoza: string,
+  retete: Array<RecipeDto>,
   deletedAt: number;
   createdAt: number;
   updatedAt: number;

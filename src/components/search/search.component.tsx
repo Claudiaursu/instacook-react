@@ -13,7 +13,6 @@ import React from 'react';
 import { TextInput } from '../text-input';
 import { UserDto, useGetUsersBySearchQuery } from '../../services/user-interaction.service';
 import { SearchedUserComponent } from '../searched-user/searched-user.component';
-import { useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchStackParamList } from '../../screens/Search/navigator.types';
 

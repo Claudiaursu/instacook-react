@@ -39,6 +39,14 @@ export const recipeSlice = createApi({
         },
       }),
     }),
+    getRecipesByCollectionId: builder.query<RecipeDto[], { id: number,  token: string}>({
+      query: ({ id, token }) => ({
+        url: `/collection/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
     addNewRecipe: builder.mutation<undefined, { recipe: RecipeProps, token: string} >({
       query: ({recipe, token}) => ({
         url: "/",
@@ -53,4 +61,8 @@ export const recipeSlice = createApi({
   }),
 });
 
-export const { useAddNewRecipeMutation, useGetRecipesByUserIdQuery } = recipeSlice;
+export const { 
+  useAddNewRecipeMutation, 
+  useGetRecipesByUserIdQuery,
+  useGetRecipesByCollectionIdQuery
+} = recipeSlice;

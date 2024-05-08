@@ -33,9 +33,13 @@ export const CollectionComponent = ({
   useEffect(() => {
     const getPicture = async () => {
       const path = collection.calePoza;
-      const imgRef = ref(storage, path);
-      const imgUrl = await getDownloadURL(imgRef);
-      setImageUrl(imgUrl);
+      
+      if (path) {
+        const imgRef = ref(storage, path);
+        const imgUrl = await getDownloadURL(imgRef);
+        setImageUrl(imgUrl);
+        console.log("IMAGINE COL ", imgUrl)
+      }
     };
 
     getPicture();
@@ -88,12 +92,27 @@ export const CollectionComponent = ({
             >
               {collection.descriereColectie}
             </Text>
-            <Text variant="technicalText" sx={{ marginBottom: 5 }}>
-              Created at: {collectionDate.toLocaleString()}
-            </Text>
 
             <Text variant="technicalText" sx={{ marginBottom: 5 }}>
-              Recipes: 0
+              Recipes: {collection.retete.length}
+            </Text>
+
+            { !collection.publica && 
+              (
+                <View>
+                  <Text variant="technicalText" sx={{ marginBottom: 5 }}>
+                    Private {collection.publica}
+                    <MaterialCommunityIcons
+                      name="lock"
+                      size={16}
+                      color={theme.colors.secondary}
+                    />
+                  </Text>
+                </View>
+              )}
+
+            <Text variant="technicalText" sx={{ marginBottom: 5 }}>
+              Created at: {collectionDate.toLocaleDateString()}
             </Text>
           </View>
         </View>
@@ -128,8 +147,8 @@ const styles = (activeSchema: string) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      paddingHorizontal: 10,
-      marginBottom: 10,
+      paddingHorizontal: 5,
+      marginBottom: 5,
     },
     card: {
       backgroundColor: activeSchema == 'light' ? '#ffe6e6' : '#862d59',
