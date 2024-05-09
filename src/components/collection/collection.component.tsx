@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, TouchableWithoutFeedback } from 'react-native';
 import { Text } from '../../components/text';
 import { CollectionDto, useDeleteCollectionByIdMutation } from '../../services/collection.service';
 import { getDownloadURL, ref } from 'firebase/storage';
@@ -9,16 +9,30 @@ import { RootState } from '../../store/store';
 import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/navigator.types';
+import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
+
+type CollectionProps = NativeStackScreenProps<ProfileStackParamList, "CollectionInfo">;
+
+import * as RootNavigation from '../../navigation/root-navigation';
+import { ProfileStackParamList } from '../../screens/ProfileNavigator/navigator.types';
 
 export const CollectionComponent = ({
   collection,
   isOwner,
   handleDeleteUpdates,
+  //navigation
 }: {
   collection: CollectionDto;
   isOwner: boolean;
   handleDeleteUpdates: any;
+  //navigation: CollectionProps;
 }) => {
+
+  const navigation = useNavigation();
+
   const collectionDate = new Date(collection.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
   const token = useSelector((state: RootState) => state.userData.token);
@@ -29,6 +43,12 @@ export const CollectionComponent = ({
   const [imageUrl, setImageUrl] = useState("");
 
   const { theme, activeScheme, toggleThemeSchema } = useThemeConsumer();
+
+  const handleRedirect = () => {
+    navigation.dispatch(CommonActions.navigate({ name: 'CollectionInfo', params: { collectionId: collection.id } }));
+
+    //RootNavigation.navigate('CollectionInfo', { collectionId: collection.id });
+  }
 
   useEffect(() => {
     const getPicture = async () => {
@@ -59,6 +79,7 @@ export const CollectionComponent = ({
   };
 
   return (
+    <TouchableWithoutFeedback onPress={handleRedirect}>
     <View style={styles(activeScheme).container}>
       <View style={styles(activeScheme).card}>
         <Text variant="subtitle">{collection.titluColectie}</Text>
@@ -140,6 +161,7 @@ export const CollectionComponent = ({
         )}
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 };
 

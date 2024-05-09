@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Dimensions } from 'react-native';
-import { Text } from '../../components/text';
+import { Text } from '../text';
 import { CollectionDto } from '../../services/collection.service';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { storage } from '../../utils/firebase/firebase';
@@ -11,14 +11,12 @@ import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RecipeDto } from '../../services/recipe.service';
 
-export const RecipeComponent = (
+export const RecipeCardComponent = (
   { recipe, isOwner }: { recipe: RecipeDto, isOwner: boolean },
-  ) => {
+) => {
   
   const recipeDate = new Date(recipe.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
-
-  console.log("DIN RETETA RECIPE LOG: ", recipe)
 
   const [imageUrl, setImageUrl] = useState('');
 
@@ -37,43 +35,39 @@ export const RecipeComponent = (
     getPicture();
   }, [recipe.id, username]);
 
-    const {
-        theme,
-        toggleThemeSchema,
-        activeScheme
-    } = useThemeConsumer();
+  const {
+    theme,
+    toggleThemeSchema,
+    activeScheme
+  } = useThemeConsumer();
 
-    return (
-      <View style={styles.card}>
-        <Text variant="subtitle">{recipe.titluReteta}</Text>
-  
-        <View style={{ alignItems: "center" }}>
-            {imageUrl && (
-              <Image
-                source={{ uri: imageUrl }}
-                style={styles.image}
-              />
-            )}
+  return (
+    <View style={[styles.card, styles.cardContainer]}>
+      <View style={{ alignItems: "center" }}>
+        {imageUrl && (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+          />
+        )}
 
-            {!imageUrl && (
-              <MaterialCommunityIcons
-                name="chef-hat"
-                size={50}
-                color={theme.colors.primary}
-              />
-            )}
+        {!imageUrl && (
+          <MaterialCommunityIcons
+            name="chef-hat"
+            size={50}
+            color={theme.colors.primary}
+          />
+        )}
+      </View>
 
-            {/* <Image source={{ uri: imageUrl }} style={styles(activeScheme).image} /> */}
-          </View>
-
-        {isOwner ? 
+      {!isOwner ? 
         <View style={styles.buttonContainer}>
           <Button
             variant="primary"
             onPress={() => {
               // Handle edit button press
             }}
-            title="Edit"
+            title="Like"
           />
           <Button
             variant="primary"
@@ -84,35 +78,38 @@ export const RecipeComponent = (
           />
         </View>
       : null}
+    </View>
+  );
+};
 
-      </View>
-    );
-  };
-  
-  const { width } = Dimensions.get('window');
-  const cardWidth = (width - 48) / 2; // Calculate card width for two columns
-  
-  const styles = StyleSheet.create({
-    card: {
-      backgroundColor: '#ffe6e6',
-      padding: 10,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: '#8f246b',
-      width: cardWidth,
-      marginBottom: 16,
-    },
-    image: {
-      borderRadius: 10,
-      height: 150,
-      width: '100%',
-      marginBottom: 10,
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 10,
-    },
-  });
-  
-  export default RecipeComponent;
+const { width } = Dimensions.get('window');
+const deviceWidth = width;
+const marginLeftRight = deviceWidth * 0.018; // Adjust this to change the overall margin
+const cardWidth = (deviceWidth - 2 * marginLeftRight - marginLeftRight * 2) / 2; // Calculate card width for two columns
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    marginLeft: marginLeftRight,
+    marginRight: marginLeftRight,
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: '#ffe6e6',
+    padding: 10,
+    borderRadius: 8,
+    width: cardWidth,
+  },
+  image: {
+    borderRadius: 10,
+    height: 150,
+    width: '100%',
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+});
+
+export default RecipeCardComponent;

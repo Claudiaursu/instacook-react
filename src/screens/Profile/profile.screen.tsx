@@ -25,13 +25,12 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { SearchComponent } from "../../components/search/search.component";
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
 import { useGetRecipesByUserIdQuery } from "../../services/recipe.service";
+import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 
 
-type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
-const Tab = createMaterialTopTabNavigator();
+type ProfileProps = NativeStackScreenProps<ProfileStackParamList, "ProfilePage">;
 
-
-const Profile = ({ route, navigation }: {route: any, navigation: HomeProps}) => {
+const Profile = ({ route, navigation }: {route: any, navigation: ProfileProps}) => {
 
     const username = useSelector((state: RootState) => state.userData.username);
     const loggedId = useSelector((state: RootState) => state.userData.loggedId);

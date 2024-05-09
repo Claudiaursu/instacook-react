@@ -16,6 +16,8 @@ import { RootState } from "../../store/store";
 import * as ImagePicker from 'expo-image-picker';
 import { useAddNewCollectionMutation, useDeleteCollectionByIdMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { useAddNewRecipeMutation } from "../../services/recipe.service";
+import DropdownComponent from "../../components/dropdown/dropdown.component";
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -30,10 +32,13 @@ const Cook = ({ navigation }: CookProps) => {
     id: loggedId,
     token: token
   }
-  const { data, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
+  const { data: collectionList, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
   const [addNewCollection, {isSuccess: newCollectionSuccess }] = useAddNewCollectionMutation();
+  const [addNewRecipe, {isSuccess: newRecipeSuccess }] = useAddNewRecipeMutation();
   
   const [isVisible, setIsVisible] = useState(false);
+  const [isVisibleRecipe, setIsVisibleRecipe] = useState(false);
+
   const [titleValue, setTitleValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
   const [isPrivateCollection, setIsPrivateCollection] = useState(false);
@@ -43,6 +48,15 @@ const Cook = ({ navigation }: CookProps) => {
     descriereColectie: "",
     publica: true,
     calePoza: ""
+  });
+
+  const [newRecipeObj, setNewRecipeObj] = useState({
+    titluReteta: "",
+    dificultate: "",
+    ingrediente: [],
+    instructiuni: "",
+    calePoza: "",
+    colectie: ""
   });
 
 
@@ -84,9 +98,54 @@ const Cook = ({ navigation }: CookProps) => {
     setIsVisible(false);
   }
 
+  const createRecipe = async function () {
+
+    setColectieRecipe(1);
+    setDificultateRecipe("Medium");
+    setIngredienteRecipe(["faina", "ulei", "apa"]);
+
+    const recipeProps = {
+      ...newRecipeObj,
+      token: token
+    }
+    console.log("DATAAAAA RECIPE NOUA>>>>>> ", newRecipeObj)
+
+    
+    try {
+
+      const recipeCreateParams = {
+        recipe: recipeProps,
+        token
+      }
+      const response: { data?: { id: string }; error?: any } = await addNewRecipe(recipeCreateParams); // Adjust the type accordingly
+      if (response && response.data && response.data.id) {
+        console.log("response RESULT ", response.data)
+        profileRedirect(parseInt(response.data.id))
+      }
+    } catch (error) {
+      console.log("eoare creare reteta: ", error)
+    } 
+
+  
+   setNewRecipeObj({
+      titluReteta: "",
+      dificultate: "",
+      ingrediente: [],
+      instructiuni: "",
+      calePoza: "",
+      colectie: ""
+    });
+
+    setIsVisibleRecipe(false);
+  }
+
   const openNewCollectionModal = () =>{
     setIsVisible(true);
  }
+
+  const openNewRecipeModal = () =>{
+    setIsVisibleRecipe(true);
+  }
 
   const handleFormSubmit = async () => {
     setIsVisible(false);
@@ -107,6 +166,49 @@ const Cook = ({ navigation }: CookProps) => {
     })
   }
 
+  const setTitluRecipe = function (text: string) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      titluReteta: text
+    })
+  }
+
+  const setDificultateRecipe = function (text: string) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      dificultate: text
+    })
+  }
+
+  const setIngredienteRecipe = function (list: Array<string>) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      ingrediente: []
+    })
+  }
+
+  const setInstructiuniRecipe = function (text: string) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      instructiuni: text
+    })
+  }
+
+  const setCalePozaRecipe = function (text: string) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      calePoza: text
+    })
+  }
+
+  const setColectieRecipe = function (id: number) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      colectie: id.toString()
+    })
+  }
+
+
   const setDescriereColectie = function (text: string) {
     setNewCollectionObj({
       ...newCollectionObj,
@@ -115,7 +217,7 @@ const Cook = ({ navigation }: CookProps) => {
   }
 
 
-  const uploadImageAsync = async (uri: string) => {
+  const uploadImageAsync = async (uri: string, category: string) => {
     const blob: Blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
@@ -130,8 +232,8 @@ const Cook = ({ navigation }: CookProps) => {
         xhr.send(null);
     })
 
-    const collName = newCollectionObj.titluColectie;
-    const imgPath = `${username}/${collName}/coll-pic.jpg`;
+    const randomUUID = uuid.v4();
+    let imgPath = `${username}/${category}/${randomUUID}.jpg`;
     const fileRef = ref(getStorage(), imgPath);
 
     try {
@@ -140,13 +242,18 @@ const Cook = ({ navigation }: CookProps) => {
       };
       
       const result = await uploadBytesResumable(fileRef, blob, metadata);
-      //dispatch(setValue(imgPath))
-      //return await getDownloadURL(fileRef);
 
-      setNewCollectionObj({
-        ...newCollectionObj,
-        calePoza: imgPath
-      })
+      if (category === 'collections') {
+        setNewCollectionObj({
+          ...newCollectionObj,
+          calePoza: imgPath
+        })
+      } else {
+        setNewRecipeObj({
+          ...newRecipeObj,
+          calePoza: imgPath
+        })
+      }
 
     } catch (error) {
       console.log("ERROOOOOOOR ", error)
@@ -164,8 +271,22 @@ const Cook = ({ navigation }: CookProps) => {
     console.log(result);
 
     if (!result.canceled) {
-        //setImage(result.assets[0].uri);
-        await uploadImageAsync(result.assets[0].uri);
+        await uploadImageAsync(result.assets[0].uri, "collections");
+    }
+  }
+
+  const addRecipePhoto = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+        await uploadImageAsync(result.assets[0].uri, "recipes");
     }
   }
 
@@ -199,7 +320,7 @@ const Cook = ({ navigation }: CookProps) => {
 
         <View style={{  justifyContent: 'center', alignItems: 'center' }}>
           <Button sx={{margin: 1}}
-          onPress={ () => createCollection() }
+          onPress={() => openNewRecipeModal() }
           title="Add recipe"/>
           </View>
         </View>
@@ -208,14 +329,17 @@ const Cook = ({ navigation }: CookProps) => {
 
       <Modal visible={isVisible} animationType="slide" transparent>
         <View style={styles().modalContainer}>
-          <View  style={styles().modalContent}>
+          <View  style={styles().modalContentCollection}>
           
-            <Text 
+          <View style={{ alignItems: 'center'}}>
+          <Text 
             variant="title"
             sx={{marginBottom: 15, justifyContent: 'center'}}
             >
             Create your collection
             </Text>
+          </View>
+            
 
             {/* <AddPhotoButton onPress={handleAddPhoto} /> */}
 
@@ -276,6 +400,93 @@ const Cook = ({ navigation }: CookProps) => {
         </View>
       </Modal>
 
+
+      <Modal visible={isVisibleRecipe} animationType="slide" transparent>
+        <View style={styles().modalContainer}>
+          <View  style={styles().modalContentRecipe}>
+          
+          <View style={{ alignItems: 'center', marginTop: 1, marginBottom: 10}}>
+          <Text 
+            variant="title"
+            sx={{marginBottom: 15, justifyContent: 'center'}}
+            >
+            Create your collection
+            </Text>
+          </View>
+
+
+          <View  style={{ margin: 15}}>
+          <TextInput
+                  label="Title"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onChangeText={(text) =>
+                    setTitluRecipe(text)
+              }/>
+
+              <TextInput
+                label="Dificulty"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={(text) =>
+                  setDificultateRecipe(text)
+              }/>
+
+              <TextInput
+                label="Ingredients"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={(text) =>
+                  setIngredienteRecipe([])
+              }/>
+
+              <TextInput
+                label="Instructions"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={(text) =>
+                  setInstructiuniRecipe(text)
+              }/>
+
+          </View>
+
+        <DropdownComponent data={collectionList || []}
+        ></DropdownComponent>  
+
+          <View  style={{ alignItems: 'center', alignContent: 'center'}}>
+            <Button 
+              sx={{margin: 10}}
+              variant="primary"
+              onPress = { () => addRecipePhoto() } 
+              title="Add recipe photo" />
+          </View>
+
+          <View style={{marginTop: 10,  alignItems: 'center'}} >
+          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+            <Button 
+            sx={{margin: 10}}
+            variant="primary"
+            onPress = { () => { setIsVisibleRecipe(false);} } 
+            title="Close" />
+            
+            <Button 
+            sx={{margin: 10}}
+            variant="primary"
+            onPress = { () => createRecipe() } 
+            title="Submit" />
+          </View>
+          </View>
+          
+          </View>
+        </View>
+      </Modal>
+
+        
+
        
     </View>
     )
@@ -289,11 +500,21 @@ const styles = () => {
           alignItems: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
-        modalContent: {
+        modalContentRecipe: {
           backgroundColor:"#ffe6e6",
-          padding: 20,
+          padding: 30, // Increase padding to make the modal bigger
           borderRadius: 10,
-          width: '80%',
+          width: '90%', // Adjust the width as needed
+          height: '80%',
+          justifyContent: 'center',
+          //alignItems: 'center'
+        },
+        modalContentCollection: {
+          backgroundColor:"#ffe6e6",
+          padding: 30, // Increase padding to make the modal bigger
+          borderRadius: 10,
+          width: '90%', // Adjust the width as needed
+         // height: '50%',
           justifyContent: 'center',
           alignItems: 'center'
         },

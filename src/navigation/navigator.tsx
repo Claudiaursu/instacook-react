@@ -8,6 +8,7 @@ import { LoginFormProvider, useLoginFormContext } from "../store/login.context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store"; 
+import { navigationRef } from "./root-navigation";
 
 export const Navigator = () => {
   const { activeScheme, toggleThemeSchema, theme } = useThemeConsumer();
@@ -36,7 +37,7 @@ export const Navigator = () => {
 
   
   return (
-    <NavigationContainer theme={theme}>
+    <NavigationContainer ref={navigationRef} theme={theme}>
      
       <LoginFormProvider>
      

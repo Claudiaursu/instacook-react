@@ -2,11 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
 
 type RecipeProps = {
-  titluColectie: string,
-  descriereColectie: string,
-  publica: boolean,
+  titluReteta: string,
+  dificultate: string,
+  instructiuni: string,
+  ingrediente: Array<string>,
   calePoza?: string,
-  utilizator: number
+  colectie: string
 }
 
 export type RecipeDto = {
@@ -21,6 +22,7 @@ export type RecipeDto = {
   deletedAt: number;
   createdAt: number;
   updatedAt: number;
+  colectie: string;
 };
 
 export const recipeSlice = createApi({

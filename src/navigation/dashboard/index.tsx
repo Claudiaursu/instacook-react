@@ -7,6 +7,7 @@ import Home from "../../screens/Home";
 import Profile from "../../screens/Profile";
 import Search from "../../screens/Search";
 import Cook from "../../screens/Cook";
+import ProfileNavigator from "../../screens/ProfileNavigator/profile-navigator.screen";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -41,7 +42,7 @@ export const Dashboard = () => {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="Cook" component={Cook} />
-      <Tab.Screen name="Profile" component={Profile} initialParams={{refresh: 1}}/>
+      <Tab.Screen name="Profile" component={ProfileNavigator} initialParams={{refresh: 1}}/>
     </Tab.Navigator>
   );
 };
