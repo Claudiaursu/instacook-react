@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Switch } from "react-native";
+import { FlatList, Image, Switch, TouchableOpacity } from "react-native";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { TextInput } from "../../components/text-input";
@@ -18,6 +18,9 @@ import { useAddNewCollectionMutation, useDeleteCollectionByIdMutation, useGetCol
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { useAddNewRecipeMutation } from "../../services/recipe.service";
 import DropdownComponent from "../../components/dropdown/dropdown.component";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ImagePickerSuccessResult } from "expo-image-picker";
+
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -38,12 +41,31 @@ const Cook = ({ navigation }: CookProps) => {
   
   const [isVisible, setIsVisible] = useState(false);
   const [isVisibleRecipe, setIsVisibleRecipe] = useState(false);
-
-  const [titleValue, setTitleValue] = useState('');
-  const [descriptionValue, setDescriptionValue] = useState('');
+  
   const [isPrivateCollection, setIsPrivateCollection] = useState(false);
+  
+  const [selectedRecipeImageUri, setSelectedRecipeImageUri] = useState<ImagePickerSuccessResult>();
+  const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<ImagePickerSuccessResult>();
 
-  const [newCollectionObj, setNewCollectionObj] = useState({
+
+  const recipeDificulties = [{
+      id: 1,
+      value: "Easy"
+    },
+    {
+      id: 2,
+      value: "Intermediate"
+    },
+    {
+      id: 3,
+      value: "Hard"
+    },
+    {
+      id: 4,
+      value: "Extra hard"
+    }]
+
+    const [newCollectionObj, setNewCollectionObj] = useState({
     titluColectie: "",
     descriereColectie: "",
     publica: true,
@@ -65,13 +87,18 @@ const Cook = ({ navigation }: CookProps) => {
   };
 
   const createCollection = async function () {
-    console.log("DATAAAAA ", newCollectionObj)
+    let newCollection = newCollectionObj;
+    if (selectedCollectionImageUri) {
+      let imgPath = await uploadImageAsync(selectedCollectionImageUri.assets[0].uri, "collections");      
+      newCollection.calePoza = imgPath;
+    }
 
     const collectionProps = {
-      ...newCollectionObj,
+      ...newCollection,
       utilizator: loggedId
     }
-    
+    console.log("DATAAAAA inainte de create", newCollection)
+
     try {
 
       const collectionCreateParams = {
@@ -80,7 +107,7 @@ const Cook = ({ navigation }: CookProps) => {
       }
       const response: { data?: { id: string }; error?: any } = await addNewCollection(collectionCreateParams); // Adjust the type accordingly
       if (response && response.data && response.data.id) {
-        console.log("response RESULT ", response.data)
+        console.log("response RESULT (dupa create)", response.data)
         profileRedirect(parseInt(response.data.id))
       }
     } catch (error) {
@@ -98,36 +125,8 @@ const Cook = ({ navigation }: CookProps) => {
     setIsVisible(false);
   }
 
-  const createRecipe = async function () {
-
-    setColectieRecipe(1);
-    setDificultateRecipe("Medium");
-    setIngredienteRecipe(["faina", "ulei", "apa"]);
-
-    const recipeProps = {
-      ...newRecipeObj,
-      token: token
-    }
-    console.log("DATAAAAA RECIPE NOUA>>>>>> ", newRecipeObj)
-
-    
-    try {
-
-      const recipeCreateParams = {
-        recipe: recipeProps,
-        token
-      }
-      const response: { data?: { id: string }; error?: any } = await addNewRecipe(recipeCreateParams); // Adjust the type accordingly
-      if (response && response.data && response.data.id) {
-        console.log("response RESULT ", response.data)
-        profileRedirect(parseInt(response.data.id))
-      }
-    } catch (error) {
-      console.log("eoare creare reteta: ", error)
-    } 
-
-  
-   setNewRecipeObj({
+  const clearRecipeData = () => {
+    setNewRecipeObj({
       titluReteta: "",
       dificultate: "",
       ingrediente: [],
@@ -135,8 +134,35 @@ const Cook = ({ navigation }: CookProps) => {
       calePoza: "",
       colectie: ""
     });
+    setSelectedRecipeImageUri(undefined);
+  }
+
+  const createRecipe = async function () {
+    let newRecipe = newRecipeObj;
+    if (selectedRecipeImageUri) {
+      let imgPath = await uploadImageAsync(selectedRecipeImageUri.assets[0].uri, "recipes");      
+      newRecipe.calePoza = imgPath;
+    }
+    
+    console.log("DATAAAAA RECIPE NOUA>>>>>> (inainte de create)", newRecipeObj)
+    
+    try {
+
+      const recipeCreateParams = {
+        recipe: newRecipe,
+        token
+      }
+      const response: { data?: { id: string }; error?: any } = await addNewRecipe(recipeCreateParams); // Adjust the type accordingly
+      if (response && response.data && response.data.id) {
+        console.log("response RESULT (dupa create)", response.data)
+        profileRedirect(parseInt(response.data.id))
+      }
+    } catch (error) {
+      console.log("eoare creare reteta: ", error)
+    } 
 
     setIsVisibleRecipe(false);
+    recipeCleanupOnClose();
   }
 
   const openNewCollectionModal = () =>{
@@ -231,9 +257,20 @@ const Cook = ({ navigation }: CookProps) => {
         xhr.open("GET", uri, true);
         xhr.send(null);
     })
-
+    
     const randomUUID = uuid.v4();
     let imgPath = `${username}/${category}/${randomUUID}.jpg`;
+    if (category === 'collections') {
+      setNewCollectionObj({
+        ...newCollectionObj,
+        calePoza: imgPath
+      })
+    } else {
+      setNewRecipeObj({
+        ...newRecipeObj,
+        calePoza: imgPath
+      })
+    }
     const fileRef = ref(getStorage(), imgPath);
 
     try {
@@ -243,21 +280,11 @@ const Cook = ({ navigation }: CookProps) => {
       
       const result = await uploadBytesResumable(fileRef, blob, metadata);
 
-      if (category === 'collections') {
-        setNewCollectionObj({
-          ...newCollectionObj,
-          calePoza: imgPath
-        })
-      } else {
-        setNewRecipeObj({
-          ...newRecipeObj,
-          calePoza: imgPath
-        })
-      }
-
     } catch (error) {
       console.log("ERROOOOOOOR ", error)
     }
+
+    return imgPath;
   }
 
   const addCollectionPhoto = async () => {
@@ -271,7 +298,7 @@ const Cook = ({ navigation }: CookProps) => {
     console.log(result);
 
     if (!result.canceled) {
-        await uploadImageAsync(result.assets[0].uri, "collections");
+      setSelectedCollectionImageUri(result);
     }
   }
 
@@ -283,12 +310,21 @@ const Cook = ({ navigation }: CookProps) => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
-        await uploadImageAsync(result.assets[0].uri, "recipes");
+        setSelectedRecipeImageUri(result);
     }
   }
+
+  const recipeCleanupOnClose = () => {
+    setIsVisibleRecipe(false);
+    clearRecipeData();
+  }
+
+  useEffect(() => {
+
+    console.log("selectedRecipeImageUri ", selectedRecipeImageUri)
+  }, [selectedRecipeImageUri]);
+
 
   const {
       theme
@@ -343,41 +379,81 @@ const Cook = ({ navigation }: CookProps) => {
 
             {/* <AddPhotoButton onPress={handleAddPhoto} /> */}
 
-              <TextInput
-                  label="Title"
+            <View  style={{ margin: 15}}>
+                <TextInput
+                    label="Title"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    style={{
+                      textAlign: 'left', // Align text to the left
+                      paddingLeft: 1, // Add left padding for better visual
+                      paddingTop: 7,
+                      paddingBottom: 20,
+                    }}
+                    textStyle = {{
+                      color: theme.colors.cardTitle,
+                      fontSize: 14,
+                      fontWeight: "bold"
+                    }}
+                    onChangeText={(text) =>
+                      setTitluColectie(text)
+                }/>
+
+                <TextInput
+                  label="Description"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={{
+                    textAlign: 'left', // Align text to the left
+                    paddingLeft: 1, // Add left padding for better visual
+                    paddingTop: 7,
+                    paddingBottom: 20,
+                  }}
+                  textStyle = {{
+                    color: theme.colors.cardTitle,
+                    fontSize: 14,
+                    fontWeight: "bold"
+                  }}
                   onChangeText={(text) =>
-                    setTitluColectie(text)
-              }/>
+                    setDescriereColectie(text)
+                }/>
 
-              <TextInput
-                label="Description"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={(text) =>
-                  setDescriereColectie(text)
-              }/>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text sx={{
+              marginRight: 8,
+              color: theme.colors.cardTitle,
+              fontSize: 14,
+              fontWeight: "bold" 
+              }} >Private</Text>
+              <Switch
+                value={isPrivateCollection}
+                onValueChange={togglePrivacy}
+                thumbColor={isPrivateCollection ? 'pink' : '#f4f3f4'} // Pink when checked, default color when unchecked
+                trackColor={{ false: '#f4f3f4', true: 'lightpink' }} // Default color when unchecked, light pink when checked
 
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text sx={{ marginRight: 8 }} >Private</Text>
-            <Switch
-              value={isPrivateCollection}
-              onValueChange={togglePrivacy}
-              thumbColor={isPrivateCollection ? 'pink' : '#f4f3f4'} // Pink when checked, default color when unchecked
-              trackColor={{ false: '#f4f3f4', true: 'lightpink' }} // Default color when unchecked, light pink when checked
-
-            />
+              />
+            </View>
           </View>
 
-          <View>
-          <Button 
-            sx={{margin: 10}}
-            variant="primary"
-            onPress = { () => addCollectionPhoto() } 
-            title="Add collection photo" />
+          <View style={{ alignItems: 'center', alignContent: 'center'}}>
+              {selectedCollectionImageUri ? (
+            <TouchableOpacity onPress={addCollectionPhoto}>
+              <Image
+                source={{ uri: selectedCollectionImageUri.assets[0].uri }}
+                style={styles().image}
+              />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={addCollectionPhoto}>
+                <MaterialCommunityIcons
+                  name="image-outline"
+                  size={50}
+                  color={theme.colors.primary}
+                />
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={{marginTop: 10,  alignItems: 'center'}} >
@@ -410,35 +486,48 @@ const Cook = ({ navigation }: CookProps) => {
             variant="title"
             sx={{marginBottom: 15, justifyContent: 'center'}}
             >
-            Create your collection
-            </Text>
+            Create your recipe
+          </Text>
           </View>
 
 
           <View  style={{ margin: 15}}>
           <TextInput
-                  label="Title"
+                label="Title"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  style={{
+                    textAlign: 'left', // Align text to the left
+                    paddingLeft: 1, // Add left padding for better visual
+                    paddingTop: 7,
+                    paddingBottom: 25,
+                  }}
+                  textStyle = {{
+                    color: theme.colors.cardTitle,
+                    fontSize: 14,
+                    fontWeight: "bold"
+                  }}
                   onChangeText={(text) =>
                     setTitluRecipe(text)
-              }/>
-
-              <TextInput
-                label="Dificulty"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={(text) =>
-                  setDificultateRecipe(text)
-              }/>
+            }/> 
 
               <TextInput
                 label="Ingredients"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                style={{
+                  textAlign: 'left', // Align text to the left
+                  paddingLeft: 1, // Add left padding for better visual
+                  paddingTop: 7,
+                  paddingBottom: 25,
+                }}
+                textStyle = {{
+                  color: theme.colors.cardTitle,
+                  fontSize: 14,
+                  fontWeight: "bold"
+                }}
                 onChangeText={(text) =>
                   setIngredienteRecipe([])
               }/>
@@ -448,29 +537,56 @@ const Cook = ({ navigation }: CookProps) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                style={{
+                  textAlign: 'left', // Align text to the left
+                  paddingLeft: 1, // Add left padding for better visual
+                  paddingTop: 7,
+                  paddingBottom: 20,
+                }}
+                textStyle = {{
+                  color: theme.colors.cardTitle,
+                  fontSize: 14,
+                  fontWeight: "bold"
+                }}
                 onChangeText={(text) =>
                   setInstructiuniRecipe(text)
               }/>
 
+          <DropdownComponent data={recipeDificulties || []} action={setDificultateRecipe}
+          ></DropdownComponent> 
+
+          <DropdownComponent data={collectionList || []} action={setColectieRecipe}
+          ></DropdownComponent>  
+
           </View>
 
-        <DropdownComponent data={collectionList || []}
-        ></DropdownComponent>  
-
+       
           <View  style={{ alignItems: 'center', alignContent: 'center'}}>
-            <Button 
-              sx={{margin: 10}}
-              variant="primary"
-              onPress = { () => addRecipePhoto() } 
-              title="Add recipe photo" />
-          </View>
 
+      {selectedRecipeImageUri ? (
+         <TouchableOpacity onPress={addRecipePhoto}>
+          <Image
+            source={{ uri: selectedRecipeImageUri.assets[0].uri }}
+            style={styles().image}
+          />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={addRecipePhoto}>
+            <MaterialCommunityIcons
+              name="image-outline"
+              size={50}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
+        )}
+              
+          </View>
           <View style={{marginTop: 10,  alignItems: 'center'}} >
           <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
             <Button 
             sx={{margin: 10}}
             variant="primary"
-            onPress = { () => { setIsVisibleRecipe(false);} } 
+            onPress = { () => {recipeCleanupOnClose();} } 
             title="Close" />
             
             <Button 
@@ -516,7 +632,14 @@ const styles = () => {
           width: '90%', // Adjust the width as needed
          // height: '50%',
           justifyContent: 'center',
-          alignItems: 'center'
+          //alignItems: 'center'
+        },
+        image: {
+          borderRadius: 60,
+          height: 110,
+          width: 110,
+          marginBottom: 5,
+          //borderRadius: 50, 
         },
         input: {
           borderWidth: 1,
