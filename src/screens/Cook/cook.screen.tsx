@@ -97,7 +97,6 @@ const Cook = ({ navigation }: CookProps) => {
       ...newCollection,
       utilizator: loggedId
     }
-    console.log("DATAAAAA inainte de create", newCollection)
 
     try {
 
@@ -107,7 +106,6 @@ const Cook = ({ navigation }: CookProps) => {
       }
       const response: { data?: { id: string }; error?: any } = await addNewCollection(collectionCreateParams); // Adjust the type accordingly
       if (response && response.data && response.data.id) {
-        console.log("response RESULT (dupa create)", response.data)
         profileRedirect(parseInt(response.data.id))
       }
     } catch (error) {
@@ -143,9 +141,7 @@ const Cook = ({ navigation }: CookProps) => {
       let imgPath = await uploadImageAsync(selectedRecipeImageUri.assets[0].uri, "recipes");      
       newRecipe.calePoza = imgPath;
     }
-    
-    console.log("DATAAAAA RECIPE NOUA>>>>>> (inainte de create)", newRecipeObj)
-    
+        
     try {
 
       const recipeCreateParams = {
@@ -154,7 +150,6 @@ const Cook = ({ navigation }: CookProps) => {
       }
       const response: { data?: { id: string }; error?: any } = await addNewRecipe(recipeCreateParams); // Adjust the type accordingly
       if (response && response.data && response.data.id) {
-        console.log("response RESULT (dupa create)", response.data)
         profileRedirect(parseInt(response.data.id))
       }
     } catch (error) {
@@ -295,8 +290,6 @@ const Cook = ({ navigation }: CookProps) => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       setSelectedCollectionImageUri(result);
     }
@@ -321,8 +314,6 @@ const Cook = ({ navigation }: CookProps) => {
   }
 
   useEffect(() => {
-
-    console.log("selectedRecipeImageUri ", selectedRecipeImageUri)
   }, [selectedRecipeImageUri]);
 
 
