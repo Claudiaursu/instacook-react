@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
+import { RecipeWithReactionsDto } from "./types";
 
 type RecipeProps = {
   titluReteta: string,
@@ -25,6 +26,24 @@ export type RecipeDto = {
   colectie: string;
 };
 
+export type RecipeSummaryDto = {
+  id: string,
+  titlureteta: string,
+  dificultate: string,
+  ingrediente: Array<string>,
+  instructiuni: string,
+  calepoza: string,
+  calevideo: string,
+  participaconcurs: boolean,
+  deletedat: number;
+  createdat: number;
+  updatedat: number;
+  colectie: string;
+  reactii: string;
+  comentarii: string;
+};
+
+
 export const recipeSlice = createApi({
   reducerPath: "recipes",
   baseQuery: fetchBaseQuery({
@@ -41,9 +60,17 @@ export const recipeSlice = createApi({
         },
       }),
     }),
-    getRecipesByCollectionId: builder.query<RecipeDto[], { id: number,  token: string}>({
+    getRecipesByCollectionId: builder.query<RecipeSummaryDto[], { id: number,  token: string}>({
       query: ({ id, token }) => ({
         url: `/collection/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
+    getRecipeById: builder.query<RecipeWithReactionsDto, { id: number,  token: string}>({
+      query: ({ id, token }) => ({
+        url: `/${id}`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -66,5 +93,6 @@ export const recipeSlice = createApi({
 export const { 
   useAddNewRecipeMutation, 
   useGetRecipesByUserIdQuery,
-  useGetRecipesByCollectionIdQuery
+  useGetRecipesByCollectionIdQuery,
+  useGetRecipeByIdQuery
 } = recipeSlice;

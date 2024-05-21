@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, StyleSheet, Image, Dimensions, Platform, TouchableOpacity } from 'react-native';
 import { Text } from '../text';
 import { CollectionDto } from '../../services/collection.service';
 import { getDownloadURL, ref } from 'firebase/storage';
@@ -9,20 +9,27 @@ import { RootState } from '../../store/store';
 import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { RecipeDto } from '../../services/recipe.service';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import { RecipeSummaryDto } from '../../services/recipe.service';
 
 export const RecipeCardComponent = (
-  { recipe, isOwner }: { recipe: RecipeDto, isOwner: boolean },
+  { recipe, isOwner }: { recipe: RecipeSummaryDto, isOwner: boolean },
 ) => {
-  
-  const recipeDate = new Date(recipe.createdAt);
+  const navigation = useNavigation();
+
+  console.log("recipe ", recipe)
+  const recipeDate = new Date(recipe.createdat);
   const username = useSelector((state: RootState) => state.userData.username);
 
   const [imageUrl, setImageUrl] = useState('');
 
+  const handleRedirect = () => {
+    navigation.dispatch(CommonActions.navigate({ name: 'RecipeInfo', params: { recipeId: recipe.id } }));
+  }
+
   useEffect(() => {
     const getPicture = async () => {
-      const path = recipe.calePoza;
+      const path = recipe.calepoza;
       if (path) {
         const imgRef = ref(storage, path);
         const imgUrl = await getDownloadURL(imgRef);
@@ -42,6 +49,8 @@ export const RecipeCardComponent = (
   } = useThemeConsumer();
 
   return (
+    <TouchableOpacity onPress={handleRedirect}>
+
     <View style={[styles.card, styles.cardContainer]}>
       <View style={{ alignItems: "center" }}>
         {imageUrl && (
@@ -58,6 +67,27 @@ export const RecipeCardComponent = (
             color={theme.colors.primary}
           />
         )}
+      </View>
+
+      <View style={styles.socialIcon}>
+        <View style ={{flexDirection: 'row',  alignItems: 'center', margin: 3}}>
+          <Text sx= {{fontWeight: "500", marginRight: 10}}>{recipe.reactii}</Text>
+          <MaterialCommunityIcons
+            name="heart-outline"
+            size={25}
+            color={theme.colors.primary}
+          />
+        </View>
+
+        <View style ={{flexDirection: 'row',  alignItems: 'center', margin: 3}}> 
+          <Text sx= {{fontWeight: "500" , marginRight: 10}} >{recipe.comentarii}</Text>
+          <MaterialCommunityIcons
+            name="chat-outline"
+            size={25}
+            color={theme.colors.primary}
+          />
+        </View>
+        
       </View>
 
       {!isOwner ? 
@@ -79,6 +109,7 @@ export const RecipeCardComponent = (
         </View>
       : null}
     </View>
+    </TouchableOpacity>
   );
 };
 
@@ -94,22 +125,32 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ffe6e6',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#eafafa',
+    paddingBottom: 5,
+    borderRadius: 10,
     width: cardWidth,
   },
   image: {
-    borderRadius: 10,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     height: 150,
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 0,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
+  socialIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 20, // Adjust spacing between icons
+    marginTop: 5,
+  }
 });
 
 export default RecipeCardComponent;

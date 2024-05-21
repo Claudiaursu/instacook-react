@@ -18,8 +18,6 @@ export const RecipeComponent = (
   const recipeDate = new Date(recipe.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
 
-  console.log("DIN RETETA RECIPE LOG: ", recipe)
-
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {

@@ -11,6 +11,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useThemeConsumer } from './src/utils/theme/theme.consumer';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LogBox } from "react-native"
+
+LogBox.ignoreAllLogs(true)
 
 export default function App() {
   const { activeScheme, toggleThemeSchema, theme } = useThemeConsumer();

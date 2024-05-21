@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAddNewCollectionMutation, useDeleteCollectionByIdMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { CollectionNavStackParamList } from "../../components/collection-list-wrapper/collection-list.navigator";
-import { RecipeDto, useGetRecipesByCollectionIdQuery } from "../../services/recipe.service";
+import { RecipeDto, RecipeSummaryDto, useGetRecipesByCollectionIdQuery } from "../../services/recipe.service";
 import RecipeCardComponent from "../../components/recipe-card/recipe-card.component";
 
 type CollectionInfoProps = NativeStackScreenProps<CollectionNavStackParamList, "CollectionInfo">;
@@ -42,13 +42,12 @@ const CollectionInfo = ({
     token: token
   }
   const { data: recipesList, error, isLoading, refetch } = useGetRecipesByCollectionIdQuery(recipesParams);
-  console.log("RETETEEEEEEE ", recipesList)
 
   const {
       theme
   } = useThemeConsumer();  
 
-  const renderItem = ({ item }: { item: RecipeDto }) => {
+  const renderItem = ({ item }: { item: RecipeSummaryDto }) => {
     return <RecipeCardComponent recipe={item} isOwner={true}/>
   };
 

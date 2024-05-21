@@ -43,10 +43,10 @@ const CollectionList = ({userId, refresh}: {userId:number, refresh:number}) => {
   }
 
   useEffect(() => {
+    refetch()
     if (data && data.length > 0 ) {
       setCollectionDataList(data);
     }
-    refetch()
   }, [data, refresh]);
 
 
