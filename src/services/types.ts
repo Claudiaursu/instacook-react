@@ -29,6 +29,10 @@ export type ReactieDto = {
 export type ComentariuDto = {
   id: string;
   text: string;
+  utilizator: {
+    username: string;
+    pozaProfil: string;
+  }
   dataPostare: number;
   deletedat: number;
   createdat: number;

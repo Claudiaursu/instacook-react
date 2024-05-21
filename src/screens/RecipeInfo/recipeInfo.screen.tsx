@@ -1,8 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState, useRef } from "react";
-import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { RootStackParamList } from "../../navigation/navigator.types";
+import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, TextInput } from "react-native";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +11,7 @@ import { storage } from "../../utils/firebase/firebase";
 import { getDownloadURL, ref } from "firebase/storage";
 import { useGetRecipeByIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
+import { useLikeRecipeMutation, useUnlikeRecipeMutation } from '../../services/reactions.service';
 import * as Animatable from 'react-native-animatable';
 
 type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo">;
@@ -20,6 +20,8 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const dispatch = useDispatch();
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token);
+  const [likeRecipe, { isSuccess: likeRecipeSuccess }] = useLikeRecipeMutation();
+  const [unlikeRecipe, { isSuccess: unlikeRecipeSuccess }] = useUnlikeRecipeMutation();
 
   const { recipeId } = route.params;
   const recipeParams = {
@@ -30,21 +32,65 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const [imageUrl, setImageUrl] = useState('');
   const [isLikedByLoggedUser, setIsLikedByLoggedUser] = useState(false);
   const [likesCount, setLikesCount] = useState(recipeData?.reactii.length || 0);
+  const [showAllComments, setShowAllComments] = useState(false);
   const heartIconRef = useRef<Animatable.View & View>(null);
+  const [commenterProfileImages, setCommenterProfileImages] = useState<{ [key: string]: string }>({});
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [commentText, setCommentText] = useState('');
 
   function changeReaction() {
     if (heartIconRef && heartIconRef?.current?.bounceIn) {
       heartIconRef.current.bounceIn(700);
     }
-    console.log("ID user logat ", loggedId); 
-    console.log("ID reteta ", recipeId); 
+
+    const likeParams = {
+      like: {
+        reteta: {
+          id: recipeId
+        },
+        utilizator: {
+          id: loggedId
+        }
+      },
+      token
+    }
+
     if (isLikedByLoggedUser) {
       setLikesCount(likesCount - 1);
+      unlikeRecipe(likeParams);
     } else {
       setLikesCount(likesCount + 1);
+      likeRecipe(likeParams);
     }
+    refetch();
     setIsLikedByLoggedUser(!isLikedByLoggedUser);
   }
+
+  const getCommenterPicture = async (path: string) => {
+    let imgUrl = "profile_images/default.png";
+    if (path) {
+      const imgRef = ref(storage, path);
+      imgUrl = await getDownloadURL(imgRef);
+    }
+    return imgUrl;
+  };
+
+
+  /* modal logic */
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  }
+
+  const closeModal = () => {
+    toggleModal();
+    setCommentText("");
+  }
+
+  const handleCommentSubmit = () => {
+    // Handle the comment submission
+  }
+
 
   useEffect(() => {
     const getPicture = async () => {
@@ -60,9 +106,34 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     const loggedUserReact = recipeData?.reactii.some((react) => react.utilizator.id === loggedId.toString());
     setIsLikedByLoggedUser(loggedUserReact ? true : false);
     setLikesCount(recipeData?.reactii.length || 0);
+
+    const fetchCommenterImages = async () => {
+      const newCommenterProfileImages: any = {};
+      for (const comment of recipeData?.comentarii || []) {
+        const commenterProfileUri = await getCommenterPicture(comment?.utilizator?.pozaProfil);
+        newCommenterProfileImages[comment.id] = commenterProfileUri;
+      }
+      setCommenterProfileImages(newCommenterProfileImages);
+    };
+
+    fetchCommenterImages();
   }, [recipeData]);
 
-  const { theme } = useThemeConsumer();  
+  const { theme } = useThemeConsumer();
+
+  const renderComment = (comment: any) => {
+    const commenterProfileUri = commenterProfileImages[comment.id];
+
+    return (
+      <View key={comment.id} style={styles.commentContainer}>
+        <Image source={{ uri: commenterProfileUri }} style={styles.profileImage} />
+        <View style={styles.commentTextContainer}>
+          <Text sx={styles.commentUsername}>{comment.utilizator.username}</Text>
+          <Text sx={styles.commentText}>{comment.text}</Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -94,7 +165,42 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
                 </View>
 
                 <View style={styles.socialItem}>
-                  <MaterialCommunityIcons name="chat-outline" size={30} color={theme.colors.primary} />
+                  <TouchableOpacity onPress={toggleModal}>
+                    <MaterialCommunityIcons name="chat-outline" size={30} color={theme.colors.primary} />
+                  </TouchableOpacity>
+
+                  {/* Modal for adding a comment */}
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={toggleModal}
+                  >
+                    <KeyboardAvoidingView
+                      style={styles.modalContainer}
+                      behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    >
+                      <View style={styles.modalContent}>
+                        <Text sx={styles.modalTitle}>Add a Comment</Text>
+                        <TextInput
+                          style={styles.commentInput}
+                          placeholder="Enter your comment..."
+                          //label="comment"
+                          value={commentText}
+                          onChangeText={(text) => setCommentText(text)}
+                          multiline={true}
+                          autoFocus={true}
+                        />
+                        <TouchableOpacity style={styles.submitButton} onPress={handleCommentSubmit}>
+                          <Text sx={styles.submitButtonText}>Submit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                          <Text sx={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </KeyboardAvoidingView>
+                  </Modal>
+
                   <Text sx={styles.socialText}>{recipeData.comentarii.length}</Text>
                 </View>
               </View>
@@ -116,6 +222,23 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
             <ScrollView>
               <Text sx={styles.instructions}>{recipeData.instructiuni}</Text>
             </ScrollView>
+
+            <View style={styles.commentsSection}>
+              <Text sx={styles.commentsTitle}>Comments</Text>
+              {recipeData.comentarii.length > 0 ? (
+                <>
+                  {renderComment(recipeData.comentarii[0])}
+                  {recipeData.comentarii.length > 1 && !showAllComments && (
+                    <TouchableOpacity onPress={() => setShowAllComments(true)}>
+                      <Text sx={styles.seeMoreText}>See more comments</Text>
+                  </TouchableOpacity>
+                  )}
+                  {showAllComments && recipeData.comentarii.slice(1).map(renderComment)}
+                </>
+              ) : (
+                <Text sx={styles.noCommentsText}>No comments yet</Text>
+              )}
+            </View>
           </View>
         </>
       )}
@@ -187,6 +310,104 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
   },
+  commentsSection: {
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    paddingTop: 10,
+  },
+  commentsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  commentTextContainer: {
+    flex: 1,
+  },
+  commentUsername: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  commentText: {
+    color: '#555',
+  },
+  seeMoreText: {
+    color: '#007BFF',
+    marginTop: 10,
+  },
+  noCommentsText: {
+    color: '#555',
+    fontStyle: 'italic',
+  },
+
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#F5EEF8",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+    minWidth: 300,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: 'pink',
+    alignSelf: 'center'
+  },
+  commentInput: {
+    height: 100,
+    borderColor: "transparent",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: "#FFFFFF",
+    fontSize: 16,
+    color: "#333333",
+  },
+  submitButton: {
+    backgroundColor: "#ffb3b3",
+    padding: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  closeButton: {
+    backgroundColor: "#5c5d72",
+    padding: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
 });
 
 export default RecipeInfo;
