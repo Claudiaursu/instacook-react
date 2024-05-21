@@ -7,6 +7,7 @@ import { collectionSlice } from "../services/collection.service";
 import { recipeSlice } from "../services/recipe.service";
 import { userFollowingSlice } from "../services/following.service";
 import { likesSlice } from "../services/reactions.service";
+import { commentsSlice } from "../services/comments.service";
 
 export const store = configureStore({
   reducer: { 
@@ -17,6 +18,7 @@ export const store = configureStore({
     [userSlice.name]: userSlice.reducer,
     [collectionSlice.reducerPath]: collectionSlice.reducer,
     [recipeSlice.reducerPath]: recipeSlice.reducer,
+    [commentsSlice.reducerPath]: commentsSlice.reducer,
     profilePhotoReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -27,6 +29,7 @@ export const store = configureStore({
     .concat(recipeSlice.middleware)
     .concat(userFollowingSlice.middleware)
     .concat(likesSlice.middleware)
+    .concat(commentsSlice.middleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -13,6 +13,8 @@ import { useGetRecipeByIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { useLikeRecipeMutation, useUnlikeRecipeMutation } from '../../services/reactions.service';
 import * as Animatable from 'react-native-animatable';
+import { Button } from "../../components/button";
+import { useAddRecipeCommentMutation, useDeleteRecipeCommentMutation } from "../../services/comments.service";
 
 type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo">;
 
@@ -20,8 +22,11 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const dispatch = useDispatch();
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token);
+  
   const [likeRecipe, { isSuccess: likeRecipeSuccess }] = useLikeRecipeMutation();
   const [unlikeRecipe, { isSuccess: unlikeRecipeSuccess }] = useUnlikeRecipeMutation();
+  const [addComment, { isSuccess: addCommentSuccess }] = useAddRecipeCommentMutation();
+  const [deleteComment, { isSuccess: deleteCommentSuccess }] = useDeleteRecipeCommentMutation();
 
   const { recipeId } = route.params;
   const recipeParams = {
@@ -88,7 +93,21 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   }
 
   const handleCommentSubmit = () => {
-    // Handle the comment submission
+    const commentParams = {
+      comment: {
+        reteta: {
+          id: recipeId
+        },
+        utilizator: {
+          id: loggedId
+        },
+        text: commentText
+      },
+      token
+    }
+
+    addComment(commentParams);
+    closeModal();
   }
 
 
@@ -170,36 +189,58 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
                   </TouchableOpacity>
 
                   {/* Modal for adding a comment */}
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isModalVisible}
-                    onRequestClose={toggleModal}
-                  >
-                    <KeyboardAvoidingView
-                      style={styles.modalContainer}
-                      behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    >
-                      <View style={styles.modalContent}>
-                        <Text sx={styles.modalTitle}>Add a Comment</Text>
-                        <TextInput
-                          style={styles.commentInput}
-                          placeholder="Enter your comment..."
-                          //label="comment"
-                          value={commentText}
-                          onChangeText={(text) => setCommentText(text)}
-                          multiline={true}
-                          autoFocus={true}
-                        />
-                        <TouchableOpacity style={styles.submitButton} onPress={handleCommentSubmit}>
-                          <Text sx={styles.submitButtonText}>Submit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                          <Text sx={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </KeyboardAvoidingView>
-                  </Modal>
+
+                  <Modal visible={isModalVisible} animationType="slide" transparent>
+                  <View style={styles.modalContainer}>
+                    <View  style={styles.modalContent}>
+                    
+                    <View style={{ alignItems: 'center'}}>
+                      <Text 
+                        variant="title"
+                        sx={{marginBottom: 15, justifyContent: 'center'}}
+                        >
+                        Add a Comment
+                        </Text>
+                    </View>
+
+                    
+            
+
+                <View  style={{ margin: 15}}>
+                    <TextInput
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={commentText}
+
+                      style={styles.commentInput}
+                      onChangeText={(text) => setCommentText(text)}
+                      />
+
+              
+              </View>
+
+            
+              <View style={{marginTop: 10,  alignItems: 'center'}} >
+              <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Button 
+                sx={{margin: 10}}
+                variant="primary"
+                onPress = {closeModal} 
+                title="Close" />
+                
+                <Button 
+                sx={{margin: 10}}
+                variant="primary"
+                onPress = {handleCommentSubmit} 
+                title="Submit" />
+              </View>
+              </View>
+              
+              </View>
+            </View>
+          </Modal>
+
 
                   <Text sx={styles.socialText}>{recipeData.comentarii.length}</Text>
                 </View>
@@ -379,7 +420,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F5EEF8",
     fontSize: 16,
     color: "#333333",
   },
