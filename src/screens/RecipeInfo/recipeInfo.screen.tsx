@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
@@ -12,6 +12,7 @@ import { storage } from "../../utils/firebase/firebase";
 import { getDownloadURL, ref } from "firebase/storage";
 import { useGetRecipeByIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
+import * as Animatable from 'react-native-animatable';
 
 type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo">;
 
@@ -28,10 +29,13 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const { data: recipeData, error, isLoading, refetch } = useGetRecipeByIdQuery(recipeParams);
   const [imageUrl, setImageUrl] = useState('');
   const [isLikedByLoggedUser, setIsLikedByLoggedUser] = useState(false);
-
   const [likesCount, setLikesCount] = useState(recipeData?.reactii.length || 0);
+  const heartIconRef = useRef<Animatable.View & View>(null);
 
   function changeReaction() {
+    if (heartIconRef && heartIconRef?.current?.bounceIn) {
+      heartIconRef.current.bounceIn(700);
+    }
     console.log("ID user logat ", loggedId); 
     console.log("ID reteta ", recipeId); 
     if (isLikedByLoggedUser) {
@@ -78,11 +82,13 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
               <View style={styles.social}>
                 <View style={styles.socialItem}>
                   <TouchableOpacity onPress={changeReaction}>
-                    {isLikedByLoggedUser ? (
-                      <MaterialCommunityIcons name="heart" size={30} color={theme.colors.primary} />
-                    ) : (
-                      <MaterialCommunityIcons name="heart-outline" size={30} color={theme.colors.primary} />
-                    )}
+                    <Animatable.View ref={heartIconRef}>
+                      {isLikedByLoggedUser ? (
+                        <MaterialCommunityIcons name="heart" size={30} color={theme.colors.primary} />
+                      ) : (
+                        <MaterialCommunityIcons name="heart-outline" size={30} color={theme.colors.primary} />
+                      )}
+                    </Animatable.View>
                   </TouchableOpacity>
                   <Text sx={styles.socialText}>{likesCount}</Text>
                 </View>
