@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, View, StyleSheet } from "react-native";
+import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Text } from "../../components/text";
@@ -17,7 +17,6 @@ type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo
 
 const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const dispatch = useDispatch();
-  const username = useSelector((state: RootState) => state.userData.username);
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token);
 
@@ -28,6 +27,20 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   };
   const { data: recipeData, error, isLoading, refetch } = useGetRecipeByIdQuery(recipeParams);
   const [imageUrl, setImageUrl] = useState('');
+  const [isLikedByLoggedUser, setIsLikedByLoggedUser] = useState(false);
+
+  const [likesCount, setLikesCount] = useState(recipeData?.reactii.length || 0);
+
+  function changeReaction() {
+    console.log("ID user logat ", loggedId); 
+    console.log("ID reteta ", recipeId); 
+    if (isLikedByLoggedUser) {
+      setLikesCount(likesCount - 1);
+    } else {
+      setLikesCount(likesCount + 1);
+    }
+    setIsLikedByLoggedUser(!isLikedByLoggedUser);
+  }
 
   useEffect(() => {
     const getPicture = async () => {
@@ -39,6 +52,10 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
       }
     };
     getPicture();
+
+    const loggedUserReact = recipeData?.reactii.some((react) => react.utilizator.id === loggedId.toString());
+    setIsLikedByLoggedUser(loggedUserReact ? true : false);
+    setLikesCount(recipeData?.reactii.length || 0);
   }, [recipeData]);
 
   const { theme } = useThemeConsumer();  
@@ -60,24 +77,39 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
               <Text sx={styles.title}>{recipeData.titluReteta}</Text>
               <View style={styles.social}>
                 <View style={styles.socialItem}>
-                  <MaterialCommunityIcons name="heart-outline" size={30} color={theme.colors.primary} />
-                  <Text sx={styles.socialText}>{recipeData.reactii.length}</Text>
+                  <TouchableOpacity onPress={changeReaction}>
+                    {isLikedByLoggedUser ? (
+                      <MaterialCommunityIcons name="heart" size={30} color={theme.colors.primary} />
+                    ) : (
+                      <MaterialCommunityIcons name="heart-outline" size={30} color={theme.colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                  <Text sx={styles.socialText}>{likesCount}</Text>
                 </View>
+
                 <View style={styles.socialItem}>
                   <MaterialCommunityIcons name="chat-outline" size={30} color={theme.colors.primary} />
                   <Text sx={styles.socialText}>{recipeData.comentarii.length}</Text>
                 </View>
               </View>
             </View>
+
             <Text sx={styles.info}>Difficulty: {recipeData.dificultate}</Text>
             <Text sx={styles.info}>Ingredients:</Text>
             <FlatList
               data={recipeData.ingrediente}
-              renderItem={({ item }) => <Text sx={styles.item}>{item}</Text>}
+              renderItem={({ item }) => (
+                <View style={styles.ingredientItem}>
+                  <MaterialCommunityIcons name="circle-medium" size={20} color="pink" />
+                  <Text sx={styles.ingredientText}>{item}</Text>
+                </View>
+              )}
               keyExtractor={(item, index) => index.toString()}
             />
             <Text sx={styles.info}>Instructions:</Text>
-            <Text sx={styles.instructions}>{recipeData.instructiuni}</Text>
+            <ScrollView>
+              <Text sx={styles.instructions}>{recipeData.instructiuni}</Text>
+            </ScrollView>
           </View>
         </>
       )}
@@ -88,11 +120,11 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#F5EEF8",
   },
   imageContainer: {
     alignItems: "center",
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#d6f5f5",
     padding: 16,
   },
   image: {
@@ -134,10 +166,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
-  item: {
-    fontSize: 14,
+  ingredientItem: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 4,
-    paddingLeft: 16,
+  },
+  ingredientText: {
+    fontSize: 14,
+    color: "pink",
+    marginLeft: 8,
   },
   instructions: {
     fontSize: 14,

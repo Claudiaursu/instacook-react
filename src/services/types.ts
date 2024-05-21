@@ -21,6 +21,9 @@ export type ReactieDto = {
   deletedat: number;
   createdat: number;
   updatedat: number;
+  utilizator: {
+    id: string;
+  }
 };
 
 export type ComentariuDto = {
