@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState, useRef } from "react";
-import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, TextInput } from "react-native";
+import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from "react-native";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
@@ -81,7 +81,6 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     return imgUrl;
   };
 
-
   /* modal logic */
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -109,7 +108,6 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     addComment(commentParams);
     closeModal();
   }
-
 
   useEffect(() => {
     const getPicture = async () => {
@@ -155,20 +153,24 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {recipeData && (
         <>
-          <View style={styles.imageContainer}>
-            {imageUrl ? (
-              <Image source={{ uri: imageUrl }} style={styles.image} />
-            ) : (
-              <MaterialCommunityIcons name="chef-hat" size={50} color={theme.colors.primary} />
-            )}
+          <View style={{backgroundColor: "#d6f5f5"}}>
+            <View style={styles.imageContainer}>
+              {imageUrl ? (
+                <Image source={{ uri: imageUrl }} style={styles.image} />
+              ) : (
+                <MaterialCommunityIcons name="chef-hat" size={50} color={theme.colors.primary} />
+              )}
+            </View>
           </View>
 
           <View style={styles.detailsContainer}>
             <View style={styles.titleZone}>
-              <Text sx={styles.title}>{recipeData.titluReteta}</Text>
+              <View style={styles.titleContainer}>
+                <Text sx={styles.title}>{recipeData.titluReteta}</Text>
+              </View>
               <View style={styles.social}>
                 <View style={styles.socialItem}>
                   <TouchableOpacity onPress={changeReaction}>
@@ -189,59 +191,46 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
                   </TouchableOpacity>
 
                   {/* Modal for adding a comment */}
-
                   <Modal visible={isModalVisible} animationType="slide" transparent>
-                  <View style={styles.modalContainer}>
-                    <View  style={styles.modalContent}>
-                    
-                    <View style={{ alignItems: 'center'}}>
-                      <Text 
-                        variant="title"
-                        sx={{marginBottom: 15, justifyContent: 'center'}}
-                        >
-                        Add a Comment
-                        </Text>
+                    <View style={styles.modalContainer}>
+                      <View style={styles.modalContent}>
+                        <View style={{ alignItems: 'center'}}>
+                          <Text 
+                            variant="title"
+                            sx={{marginBottom: 15, justifyContent: 'center'}}
+                          >
+                            Add a Comment
+                          </Text>
+                        </View>
+                        <View style={{ margin: 15}}>
+                          <TextInput
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            value={commentText}
+                            style={styles.commentInput}
+                            onChangeText={(text) => setCommentText(text)}
+                          />
+                        </View>
+                        <View style={{marginTop: 10,  alignItems: 'center'}} >
+                          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                            <Button 
+                              sx={{margin: 10}}
+                              variant="primary"
+                              onPress={closeModal} 
+                              title="Close" 
+                            />
+                            <Button 
+                              sx={{margin: 10}}
+                              variant="primary"
+                              onPress={handleCommentSubmit} 
+                              title="Submit" 
+                            />
+                          </View>
+                        </View>
+                      </View>
                     </View>
-
-                    
-            
-
-                <View  style={{ margin: 15}}>
-                    <TextInput
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      value={commentText}
-
-                      style={styles.commentInput}
-                      onChangeText={(text) => setCommentText(text)}
-                      />
-
-              
-              </View>
-
-            
-              <View style={{marginTop: 10,  alignItems: 'center'}} >
-              <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                <Button 
-                sx={{margin: 10}}
-                variant="primary"
-                onPress = {closeModal} 
-                title="Close" />
-                
-                <Button 
-                sx={{margin: 10}}
-                variant="primary"
-                onPress = {handleCommentSubmit} 
-                title="Submit" />
-              </View>
-              </View>
-              
-              </View>
-            </View>
-          </Modal>
-
-
+                  </Modal>
                   <Text sx={styles.socialText}>{recipeData.comentarii.length}</Text>
                 </View>
               </View>
@@ -260,21 +249,26 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
               keyExtractor={(item, index) => index.toString()}
             />
             <Text sx={styles.info}>Instructions:</Text>
-            <ScrollView>
-              <Text sx={styles.instructions}>{recipeData.instructiuni}</Text>
-            </ScrollView>
+            <Text sx={styles.instructions}>{recipeData.instructiuni}</Text>
 
             <View style={styles.commentsSection}>
               <Text sx={styles.commentsTitle}>Comments</Text>
               {recipeData.comentarii.length > 0 ? (
                 <>
                   {renderComment(recipeData.comentarii[0])}
-                  {recipeData.comentarii.length > 1 && !showAllComments && (
+                  {!showAllComments && recipeData.comentarii.length > 1 && (
                     <TouchableOpacity onPress={() => setShowAllComments(true)}>
                       <Text sx={styles.seeMoreText}>See more comments</Text>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
                   )}
-                  {showAllComments && recipeData.comentarii.slice(1).map(renderComment)}
+                  {showAllComments && (
+                    <FlatList
+                      data={recipeData.comentarii.slice(1)}
+                      renderItem={({ item }) => renderComment(item)}
+                      keyExtractor={(item) => item.id.toString()}
+                      ListEmptyComponent={<Text sx={styles.noCommentsText}>No comments yet</Text>}
+                    />
+                  )}
                 </>
               ) : (
                 <Text sx={styles.noCommentsText}>No comments yet</Text>
@@ -283,7 +277,7 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
           </View>
         </>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -296,6 +290,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#d6f5f5",
     padding: 16,
+    borderRadius: 16,
   },
   image: {
     width: "100%",
@@ -312,6 +307,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  titleContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -319,7 +318,7 @@ const styles = StyleSheet.create({
   },
   social: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   socialItem: {
     flexDirection: "row",
@@ -391,8 +390,6 @@ const styles = StyleSheet.create({
     color: '#555',
     fontStyle: 'italic',
   },
-
-
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -448,7 +445,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-
 });
 
 export default RecipeInfo;
