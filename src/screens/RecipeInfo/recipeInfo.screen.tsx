@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState, useRef } from "react";
-import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from "react-native";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { FlatList, Image, View, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, RefreshControl, ActivityIndicator } from "react-native";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,7 +32,7 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     id: parseInt(recipeId),
     token: token
   };
-  const { data: recipeData, error, isLoading, refetch } = useGetRecipeByIdQuery(recipeParams);
+  const { data: recipeData, error, isLoading, refetch, isFetching } = useGetRecipeByIdQuery(recipeParams);
   const [imageUrl, setImageUrl] = useState('');
   const [isLikedByLoggedUser, setIsLikedByLoggedUser] = useState(false);
   const [likesCount, setLikesCount] = useState(recipeData?.reactii.length || 0);
@@ -202,8 +202,16 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     );
   };
 
+  const onRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}
+    refreshControl={
+      <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+    }
+    >
       {recipeData && (
         <>
           <View style={{backgroundColor: "#d6f5f5"}}>
@@ -212,6 +220,9 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
                 <Image source={{ uri: imageUrl }} style={styles.image} />
               ) : (
                 <MaterialCommunityIcons name="chef-hat" size={50} color={theme.colors.primary} />
+              )}
+               {isFetching && (
+                <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingSpinner} />
               )}
             </View>
           </View>
@@ -513,6 +524,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingSpinner: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -25,
+    marginTop: -25,
   },
 });
 
