@@ -24,11 +24,10 @@ export const commentsSlice = createApi({
       }),
       invalidatesTags: ["Comments"],
     }),
-    deleteRecipeComment: builder.mutation<undefined, {comment: CommentProps, token: string}>({
-      query: ({comment, token}) => ({
-        url: `/remove`,
-        method: "POST",
-        body: comment,
+    deleteRecipeComment: builder.mutation<undefined, {commentId: string, token: string}>({
+      query: ({commentId, token}) => ({
+        url: `/remove/${commentId}`,
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },

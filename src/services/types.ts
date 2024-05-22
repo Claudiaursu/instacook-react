@@ -30,6 +30,7 @@ export type ComentariuDto = {
   id: string;
   text: string;
   utilizator: {
+    id: string;
     username: string;
     pozaProfil: string;
   }

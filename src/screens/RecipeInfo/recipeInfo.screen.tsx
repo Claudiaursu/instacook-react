@@ -13,7 +13,6 @@ import { useGetRecipeByIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { useLikeRecipeMutation, useUnlikeRecipeMutation } from '../../services/reactions.service';
 import * as Animatable from 'react-native-animatable';
-import { Button } from "../../components/button";
 import { useAddRecipeCommentMutation, useDeleteRecipeCommentMutation } from "../../services/comments.service";
 
 type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo">;
@@ -43,6 +42,10 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editCommentText, setEditCommentText] = useState('');
+  const [currentComment, setCurrentComment] = useState<any>(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   function changeReaction() {
     if (heartIconRef && heartIconRef?.current?.bounceIn) {
@@ -109,6 +112,43 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     closeModal();
   }
 
+  const openEditModal = (comment: any) => {
+    setCurrentComment(comment);
+    setEditCommentText(comment.text);
+    setIsEditModalVisible(true);
+  }
+
+  const closeEditModal = () => {
+    setIsEditModalVisible(false);
+    setCurrentComment(null);
+    setEditCommentText('');
+  }
+
+  const handleEditSubmit = () => {
+    // Update the comment logic here
+    closeEditModal();
+  }
+
+  const openDeleteModal = (comment: any) => {
+    setCurrentComment(comment);
+    setIsDeleteModalVisible(true);
+  }
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalVisible(false);
+    setCurrentComment(null);
+  }
+
+  const handleDeleteSubmit = () => {
+    const deleteParams = {
+      commentId: currentComment.id,
+      token
+    }
+
+    deleteComment(deleteParams);
+    closeDeleteModal();
+  }
+
   useEffect(() => {
     const getPicture = async () => {
       const path = recipeData?.calePoza;
@@ -148,6 +188,16 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
           <Text sx={styles.commentUsername}>{comment.utilizator.username}</Text>
           <Text sx={styles.commentText}>{comment.text}</Text>
         </View>
+        {comment.utilizator.id === loggedId.toString() && (
+          <>
+            <TouchableOpacity onPress={() => openEditModal(comment)} style={styles.iconButton}>
+              <MaterialCommunityIcons name="pencil-outline" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => openDeleteModal(comment)} style={styles.iconButton}>
+              <MaterialCommunityIcons name="delete-outline" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     );
   };
@@ -189,45 +239,24 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
                   <TouchableOpacity onPress={toggleModal}>
                     <MaterialCommunityIcons name="chat-outline" size={30} color={theme.colors.primary} />
                   </TouchableOpacity>
-
-                  {/* Modal for adding a comment */}
                   <Modal visible={isModalVisible} animationType="slide" transparent>
                     <View style={styles.modalContainer}>
                       <View style={styles.modalContent}>
-                        <View style={{ alignItems: 'center'}}>
-                          <Text 
-                            variant="title"
-                            sx={{marginBottom: 15, justifyContent: 'center'}}
-                          >
-                            Add a Comment
-                          </Text>
-                        </View>
-                        <View style={{ margin: 15}}>
-                          <TextInput
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            value={commentText}
-                            style={styles.commentInput}
-                            onChangeText={(text) => setCommentText(text)}
-                          />
-                        </View>
-                        <View style={{marginTop: 10,  alignItems: 'center'}} >
-                          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Button 
-                              sx={{margin: 10}}
-                              variant="primary"
-                              onPress={closeModal} 
-                              title="Close" 
-                            />
-                            <Button 
-                              sx={{margin: 10}}
-                              variant="primary"
-                              onPress={handleCommentSubmit} 
-                              title="Submit" 
-                            />
-                          </View>
-                        </View>
+                        <Text sx={styles.modalTitle}>Add Comment</Text>
+                        <TextInput
+                          style={styles.commentInput}
+                          multiline
+                          numberOfLines={4}
+                          value={commentText}
+                          onChangeText={setCommentText}
+                          placeholder="Write your comment here..."
+                        />
+                        <TouchableOpacity style={styles.submitButton} onPress={handleCommentSubmit}>
+                          <Text sx={styles.submitButtonText}>Submit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                          <Text sx={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
                   </Modal>
@@ -277,6 +306,43 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
           </View>
         </>
       )}
+      {/* Edit Comment Modal */}
+      <Modal visible={isEditModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text sx={styles.modalTitle}>Edit Comment</Text>
+            <TextInput
+              style={styles.commentInput}
+              multiline
+              numberOfLines={4}
+              value={editCommentText}
+              onChangeText={setEditCommentText}
+              placeholder="Edit your comment here..."
+            />
+            <TouchableOpacity style={styles.submitButton} onPress={handleEditSubmit}>
+              <Text sx={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={closeEditModal}>
+              <Text sx={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal visible={isDeleteModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text sx={styles.modalTitle}>Confirm Delete</Text>
+            <Text>Are you sure you want to delete this comment?</Text>
+            <TouchableOpacity style={styles.submitButton} onPress={handleDeleteSubmit}>
+              <Text sx={styles.submitButtonText}>Yes, delete it</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={closeDeleteModal}>
+              <Text sx={styles.closeButtonText}>No, keep it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -382,6 +448,9 @@ const styles = StyleSheet.create({
   commentText: {
     color: '#555',
   },
+  iconButton: {
+    marginLeft: 5,
+  },
   seeMoreText: {
     color: '#007BFF',
     marginTop: 10,
@@ -434,7 +503,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   closeButton: {
-    backgroundColor: "#5c5d72",
+    backgroundColor: "#bf4080",
     padding: 12,
     borderRadius: 5,
     alignItems: "center",
