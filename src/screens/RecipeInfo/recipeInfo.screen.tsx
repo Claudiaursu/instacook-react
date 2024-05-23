@@ -13,7 +13,7 @@ import { useGetRecipeByIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { useLikeRecipeMutation, useUnlikeRecipeMutation } from '../../services/reactions.service';
 import * as Animatable from 'react-native-animatable';
-import { useAddRecipeCommentMutation, useDeleteRecipeCommentMutation } from "../../services/comments.service";
+import { useAddRecipeCommentMutation, useDeleteRecipeCommentMutation, useUpdateRecipeCommentMutation } from "../../services/comments.service";
 
 type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo">;
 
@@ -25,6 +25,7 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const [likeRecipe, { isSuccess: likeRecipeSuccess }] = useLikeRecipeMutation();
   const [unlikeRecipe, { isSuccess: unlikeRecipeSuccess }] = useUnlikeRecipeMutation();
   const [addComment, { isSuccess: addCommentSuccess }] = useAddRecipeCommentMutation();
+  const [updateComment, { isSuccess: updateCommentSuccess }] = useUpdateRecipeCommentMutation();
   const [deleteComment, { isSuccess: deleteCommentSuccess }] = useDeleteRecipeCommentMutation();
 
   const { recipeId } = route.params;
@@ -114,6 +115,7 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
 
   const openEditModal = (comment: any) => {
     setCurrentComment(comment);
+    console.log("current comment ", comment)
     setEditCommentText(comment.text);
     setIsEditModalVisible(true);
   }
@@ -125,7 +127,14 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   }
 
   const handleEditSubmit = () => {
-    // Update the comment logic here
+    const updateCommentParams = {
+      comment: {
+        text: editCommentText
+      },
+      token,
+      commentId: currentComment.id
+    }
+    updateComment(updateCommentParams);
     closeEditModal();
   }
 
@@ -331,7 +340,7 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
               placeholder="Edit your comment here..."
             />
             <TouchableOpacity style={styles.submitButton} onPress={handleEditSubmit}>
-              <Text sx={styles.submitButtonText}>Submit</Text>
+              <Text sx={styles.submitButtonText}>Save</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={closeEditModal}>
               <Text sx={styles.closeButtonText}>Close</Text>

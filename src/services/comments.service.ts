@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export type CommentProps = {
-  reteta: Object,
-  utilizator: Object,
+  reteta?: Object,
+  utilizator?: Object,
   text?: string
 };
 
@@ -17,6 +17,17 @@ export const commentsSlice = createApi({
       query: ({comment, token}) => ({
         url: "",
         method: "POST",
+        body: comment,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Comments"],
+    }),
+    updateRecipeComment: builder.mutation<undefined, {comment: CommentProps, token: string, commentId: string}>({
+      query: ({comment, token, commentId}) => ({
+        url: `/${commentId}`,
+        method: "PATCH",
         body: comment,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -39,5 +50,6 @@ export const commentsSlice = createApi({
 
 export const { 
   useAddRecipeCommentMutation,
-  useDeleteRecipeCommentMutation
+  useDeleteRecipeCommentMutation,
+  useUpdateRecipeCommentMutation
 } = commentsSlice;
