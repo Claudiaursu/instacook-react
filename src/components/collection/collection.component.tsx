@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, Image, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import { Text } from '../../components/text';
 import { CollectionDto, useDeleteCollectionByIdMutation } from '../../services/collection.service';
 import { getDownloadURL, ref } from 'firebase/storage';
@@ -140,23 +140,34 @@ export const CollectionComponent = ({
 
         {isOwner && (
           <View style={{ flexDirection: "row" }}>
-            <View>
-              <Button
+            <View style={{  flexDirection: 'row', }}>
+
+            <TouchableOpacity onPress={() => {}} style={styles(activeScheme).iconButton}>
+              <MaterialCommunityIcons name="pencil-outline" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity  onPress={deleteCollection} style={styles(activeScheme).iconButton}>
+              <MaterialCommunityIcons name="delete-outline" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+
+              
+            </View>
+            
+            {/* <Button
                 sx={{ marginLeft: 5, marginRight: 5 }}
                 variant="primary"
                 onPress={() => {}}
                 title="Edit"
-              />
-            </View>
+              /> */}
             <View>
               {/* <MaterialCommunityIcons name="trash-outline" size={24} color={theme.colors.primary} /> */}
-              <Button
+              {/* <Button
                 sx={{ marginLeft: 5, marginRight: 5 }}
                 variant="primary"
                 onPress={deleteCollection}
                 title="Delete"
-              />
+              /> */}
             </View>
+            
           </View>
         )}
       </View>
@@ -197,6 +208,9 @@ const styles = (activeSchema: string) =>
     createdAt: {
       marginTop: 5,
       color: activeSchema == 'light' ? '#333' : '#fff',
+    },
+    iconButton: {
+      marginLeft: 5,
     },
   });
 

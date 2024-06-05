@@ -21,6 +21,14 @@ import DropdownComponent from "../../components/dropdown/dropdown.component";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ImagePickerSuccessResult } from "expo-image-picker";
 
+type Reteta = {
+  titluReteta: string;
+  dificultate: string;
+  ingrediente: string[];
+  instructiuni: string;
+  calePoza: string;
+  colectie: object;
+}
 
 type CookProps = NativeStackScreenProps<RootStackParamList, "Cook">;
 
@@ -46,6 +54,7 @@ const Cook = ({ navigation }: CookProps) => {
   
   const [selectedRecipeImageUri, setSelectedRecipeImageUri] = useState<ImagePickerSuccessResult>();
   const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<ImagePickerSuccessResult>();
+  const [currentIngredient, setCurrentIngredient] = useState(""); 
 
 
   const recipeDificulties = [{
@@ -72,13 +81,13 @@ const Cook = ({ navigation }: CookProps) => {
     calePoza: ""
   });
 
-  const [newRecipeObj, setNewRecipeObj] = useState({
+  const [newRecipeObj, setNewRecipeObj] = useState<Reteta>({
     titluReteta: "",
     dificultate: "",
     ingrediente: [],
     instructiuni: "",
     calePoza: "",
-    colectie: ""
+    colectie: {}
   });
 
 
@@ -130,13 +139,17 @@ const Cook = ({ navigation }: CookProps) => {
       ingrediente: [],
       instructiuni: "",
       calePoza: "",
-      colectie: ""
+      colectie: {
+        id: "",
+        utilizator: ""
+      }
     });
     setSelectedRecipeImageUri(undefined);
   }
 
   const createRecipe = async function () {
     let newRecipe = newRecipeObj;
+
     if (selectedRecipeImageUri) {
       let imgPath = await uploadImageAsync(selectedRecipeImageUri.assets[0].uri, "recipes");      
       newRecipe.calePoza = imgPath;
@@ -148,6 +161,9 @@ const Cook = ({ navigation }: CookProps) => {
         recipe: newRecipe,
         token
       }
+
+      console.log("TRIMTEM RETETA ", newRecipe)
+
       const response: { data?: { id: string }; error?: any } = await addNewRecipe(recipeCreateParams); // Adjust the type accordingly
       if (response && response.data && response.data.id) {
         profileRedirect(parseInt(response.data.id))
@@ -225,7 +241,10 @@ const Cook = ({ navigation }: CookProps) => {
   const setColectieRecipe = function (id: number) {
     setNewRecipeObj({
       ...newRecipeObj,
-      colectie: id.toString()
+      colectie: {
+        id: id.toString(),
+        utilizator: loggedId.toString()
+      }
     })
   }
 
@@ -468,7 +487,7 @@ const Cook = ({ navigation }: CookProps) => {
       </Modal>
 
 
-      <Modal visible={isVisibleRecipe} animationType="slide" transparent>
+      {/* <Modal visible={isVisibleRecipe} animationType="slide" transparent>
         <View style={styles().modalContainer}>
           <View  style={styles().modalContentRecipe}>
           
@@ -590,8 +609,154 @@ const Cook = ({ navigation }: CookProps) => {
           
           </View>
         </View>
-      </Modal>
+      </Modal> */}
 
+
+      <Modal visible={isVisibleRecipe} animationType="slide" transparent>
+        <View style={styles().modalContainer}>
+          <View style={styles().modalContentRecipe}>
+            <View style={{ alignItems: 'center', marginTop: 1, marginBottom: 10 }}>
+              <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
+                Create your recipe
+              </Text>
+            </View>
+            <View style={{ margin: 15 }}>
+              <TextInput
+                label="Title"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={{
+                  textAlign: 'left', // Align text to the left
+                  paddingLeft: 1, // Add left padding for better visual
+                  paddingTop: 7,
+                  paddingBottom: 25,
+                }}
+                textStyle={{
+                  color: theme.colors.cardTitle,
+                  fontSize: 14,
+                  fontWeight: "bold"
+                }}
+                onChangeText={(text) => setTitluRecipe(text)}
+              />
+              <TextInput
+                label="Ingredients"
+                placeholder="Enter ingredient ..."
+                keyboardType="default"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={{
+                  textAlign: 'left',
+                  paddingLeft: 1,
+                  paddingTop: 7,
+                  paddingBottom: 25,
+                }}
+                textStyle={{
+                  color: theme.colors.cardTitle,
+                  fontSize: 14,
+                  fontWeight: "bold"
+                }}
+                value={currentIngredient}
+                onChangeText={setCurrentIngredient}
+                onSubmitEditing={() => {
+                  if (currentIngredient.trim()) {
+                    const arr: string[] = [...newRecipeObj.ingrediente, currentIngredient.trim()];
+                    setNewRecipeObj({
+                      ...newRecipeObj,
+                      ingrediente: arr,
+                    });
+                    console.log("----", newRecipeObj.ingrediente)
+                    setCurrentIngredient("");
+                  }
+                }}
+              />
+              <View style={styles().ingredientsList}>         
+                <View>
+                <FlatList
+                  data={newRecipeObj.ingrediente}
+                  renderItem={({ item, index }) => (
+                    <View style={styles().ingredientPill}>
+                      <Text sx={{ color: theme.colors.cardTitle }}>{item}</Text>
+                      <Ionicons
+                        name="close-circle"
+                        size={20}
+                        color="pink"
+                        onPress={() => {
+                          setNewRecipeObj({
+                            ...newRecipeObj,
+                            ingrediente: newRecipeObj.ingrediente.filter((_, i) => i !== index),
+                          });
+                        }}
+                      />
+                      
+                    </View>
+                  )}
+                  keyExtractor={(_, index) => index.toString()}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+
+              </View>
+              </View>
+
+              <TextInput
+                label="Instructions"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={{
+                  textAlign: 'left',
+                  paddingLeft: 1,
+                  paddingTop: 7,
+                  paddingBottom: 20,
+                }}
+                textStyle={{
+                  color: theme.colors.cardTitle,
+                  fontSize: 14,
+                  fontWeight: "bold"
+                }}
+                onChangeText={(text) => setInstructiuniRecipe(text)}
+              />
+              <DropdownComponent data={recipeDificulties || []} action={setDificultateRecipe} />
+              <DropdownComponent data={collectionList || []} action={setColectieRecipe} />
+            </View>
+            <View style={{ alignItems: 'center', alignContent: 'center' }}>
+              {selectedRecipeImageUri ? (
+                <TouchableOpacity onPress={addRecipePhoto}>
+                  <Image
+                    source={{ uri: selectedRecipeImageUri.assets[0].uri }}
+                    style={styles().image}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={addRecipePhoto}>
+                  <MaterialCommunityIcons
+                    name="image-outline"
+                    size={50}
+                    color={theme.colors.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Button
+                  sx={{ margin: 10 }}
+                  variant="primary"
+                  onPress={() => { recipeCleanupOnClose(); }}
+                  title="Close"
+                />
+                <Button
+                  sx={{ margin: 10 }}
+                  variant="primary"
+                  onPress={() => createRecipe()}
+                  title="Submit"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
         
 
        
@@ -643,6 +808,22 @@ const styles = () => {
           justifyContent: 'center',
           alignItems: 'center',
         },
+        ingredientPill: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: 'pink',
+          borderRadius: 20,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          marginHorizontal: 5,
+          //padding: 8,
+        },
+        ingredientsList: {
+          //width: '90%',
+          flexDirection: 'row',
+          marginBottom: 20, 
+          
+        }
       })
     }
 

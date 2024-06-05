@@ -1,7 +1,7 @@
 import { FlatList, RefreshControl, View } from "react-native";
 import React, { useEffect, useState } from 'react';
 import { CollectionComponent } from "../collection/collection.component";
-import { CollectionDto, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
+import { CollectionDto, useGetCollectionsByUserIdQuery, useGetPublicCollectionsByUserIdQuery } from "../../services/collection.service";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
@@ -26,11 +26,23 @@ const CollectionList = ({userId, refresh}: {userId:number, refresh:number}) => {
     id: userId,
     token: token
   }
-  const { data, error, isLoading, refetch } = useGetCollectionsByUserIdQuery(collectionParams, {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true
-  });
+  // const { data, error, isLoading, refetch } = useGetCollectionsByUserIdQuery(collectionParams, {
+  //   refetchOnMountOrArgChange: true,
+  //   refetchOnFocus: true,
+  //   refetchOnReconnect: true
+  // });
+
+  const { data, error, isLoading, refetch } = loggedId === userId
+    ? useGetCollectionsByUserIdQuery(collectionParams, {
+        refetchOnMountOrArgChange: true,
+        refetchOnFocus: true,
+        refetchOnReconnect: true
+      })
+    : useGetPublicCollectionsByUserIdQuery(collectionParams, {
+        refetchOnMountOrArgChange: true,
+        refetchOnFocus: true,
+        refetchOnReconnect: true
+      });
 
   const [collectionDataList, setCollectionDataList] = useState<CollectionDto[]>(data ? data : []); 
 

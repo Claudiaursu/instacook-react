@@ -42,8 +42,10 @@ export type UserProps = {
 export const userInteractionSlice = createApi({
   reducerPath: "userInteraction",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:9083/v1/users",
-    //baseUrl: "http://192.168.10.102:9083/v1/users",
+    //buc
+    //baseUrl: "http://192.168.100.46:9083/v1/users",
+    //cta
+    baseUrl: "http://192.168.10.103:9083/v1/users",
   }),
   tagTypes: ["Users"],
   endpoints: (builder) => ({

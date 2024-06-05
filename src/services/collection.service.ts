@@ -25,8 +25,8 @@ export type CollectionDto = {
 export const collectionSlice = createApi({
   reducerPath: "collections",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:3333/v1/collections",
-    //baseUrl: "http://192.168.10.102:3333/v1/collections",
+    //baseUrl: "http://192.168.100.46:3333/v1/collections", //buc
+    baseUrl: "http://192.168.10.103:3333/v1/collections",
   }),
   tagTypes: ["Collections"],
   refetchOnFocus: true,
@@ -34,6 +34,17 @@ export const collectionSlice = createApi({
     getCollectionsByUserId: builder.query<CollectionDto[], { id: number,  token: string}>({
       query: ({ id, token }) => ({
         url: `/user/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg
+      }
+    }),
+    getPublicCollectionsByUserId: builder.query<CollectionDto[], { id: number,  token: string}>({
+      query: ({ id, token }) => ({
+        url: `/public/user/${id}`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,5 +80,6 @@ export const collectionSlice = createApi({
 export const { 
   useAddNewCollectionMutation, 
   useGetCollectionsByUserIdQuery,
-  useDeleteCollectionByIdMutation
+  useDeleteCollectionByIdMutation,
+  useGetPublicCollectionsByUserIdQuery
 } = collectionSlice;

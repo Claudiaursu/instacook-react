@@ -8,6 +8,7 @@ import Profile from "../../screens/Profile";
 import Search from "../../screens/Search";
 import Cook from "../../screens/Cook";
 import ProfileNavigator from "../../screens/ProfileNavigator/profile-navigator.screen";
+import Notifications from "../../screens/Notifications";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -31,6 +32,8 @@ export const Dashboard = () => {
             iconName = focused ? "search" : "search-outline";
           } else if (route.name === "Cook") {
             iconName = focused ? "pizza" : "pizza-outline";
+          } else if (route.name === "Notifications") {
+            iconName = focused ? "notifications" : "notifications-outline";
           }
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -42,6 +45,7 @@ export const Dashboard = () => {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="Cook" component={Cook} />
+      <Tab.Screen name="Notifications" component={Notifications}/>
       <Tab.Screen name="Profile" component={ProfileNavigator} initialParams={{refresh: 1}}/>
     </Tab.Navigator>
   );

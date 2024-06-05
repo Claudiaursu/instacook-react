@@ -8,7 +8,7 @@ type RecipeProps = {
   instructiuni: string,
   ingrediente: Array<string>,
   calePoza?: string,
-  colectie: string
+  colectie: object
 }
 
 export type RecipeDto = {
@@ -47,8 +47,10 @@ export type RecipeSummaryDto = {
 export const recipeSlice = createApi({
   reducerPath: "recipes",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:3333/v1/recipes",
-    //baseUrl: "http://192.168.10.102:3333/v1/collections",
+    //buc
+    //baseUrl: "http://192.168.100.46:3333/v1/recipes",
+    //cta
+    baseUrl: "http://192.168.10.103:3333/v1/collections",
   }),
   tagTypes: ["Recipes"],
   endpoints: (builder) => ({

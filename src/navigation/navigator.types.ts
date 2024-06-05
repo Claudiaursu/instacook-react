@@ -6,4 +6,5 @@ export type RootStackParamList = {
   Search: undefined;
   Cook: undefined;
   Settings: undefined;
+  Notifications: undefined;
 };

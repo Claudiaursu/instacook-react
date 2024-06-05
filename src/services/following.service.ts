@@ -8,7 +8,10 @@ export type UserFollowingProps = {
 export const userFollowingSlice = createApi({
   reducerPath: "userFollowing",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:9083/v1/following",
+    //buc
+    //baseUrl: "http://192.168.100.46:9083/v1/following",
+    //cta
+    baseUrl: "http://192.168.10.103:9083/v1/following",
   }),
   tagTypes: ["Following"],
   endpoints: (builder) => ({

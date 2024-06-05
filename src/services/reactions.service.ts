@@ -8,7 +8,10 @@ export type LikeProps = {
 export const likesSlice = createApi({
   reducerPath: "recipeReactions",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.100.46:9083/v1/reactions",
+    //buc
+    //baseUrl: "http://192.168.100.46:9083/v1/reactions",
+    //cta
+    baseUrl: "http://192.168.10.103:9083/v1/reactions",
   }),
   tagTypes: ["Likes"],
   endpoints: (builder) => ({

@@ -20,6 +20,7 @@ type RecipeInfoProps = NativeStackScreenProps<ProfileStackParamList, "RecipeInfo
 const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
   const dispatch = useDispatch();
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
+  const loggedUsername = useSelector((state: RootState) => state.userData.username);
   const token = useSelector((state: RootState) => state.userData.token);
   
   const [likeRecipe, { isSuccess: likeRecipeSuccess }] = useLikeRecipeMutation();
@@ -99,10 +100,12 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     const commentParams = {
       comment: {
         reteta: {
-          id: recipeId
+          id: recipeId,
+          titluReteta: recipeData?.titluReteta
         },
         utilizator: {
-          id: loggedId
+          id: loggedId,
+          username: loggedUsername
         },
         text: commentText
       },
