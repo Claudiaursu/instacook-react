@@ -11,7 +11,7 @@ export const userFollowingSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:9083/v1/following",
     //cta
-    baseUrl: "http://192.168.10.103:9083/v1/following",
+    baseUrl: "http://192.168.10.102:9083/v1/following",
   }),
   tagTypes: ["Following"],
   endpoints: (builder) => ({

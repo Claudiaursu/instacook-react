@@ -50,7 +50,7 @@ export const recipeSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:3333/v1/recipes",
     //cta
-    baseUrl: "http://192.168.10.103:3333/v1/collections",
+    baseUrl: "http://192.168.10.102:3333/v1/collections",
   }),
   tagTypes: ["Recipes"],
   endpoints: (builder) => ({

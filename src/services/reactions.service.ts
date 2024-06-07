@@ -11,7 +11,7 @@ export const likesSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:9083/v1/reactions",
     //cta
-    baseUrl: "http://192.168.10.103:9083/v1/reactions",
+    baseUrl: "http://192.168.10.102:9083/v1/reactions",
   }),
   tagTypes: ["Likes"],
   endpoints: (builder) => ({

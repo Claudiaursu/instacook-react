@@ -45,7 +45,7 @@ export const userInteractionSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:9083/v1/users",
     //cta
-    baseUrl: "http://192.168.10.103:9083/v1/users",
+    baseUrl: "http://192.168.10.102:9083/v1/users",
   }),
   tagTypes: ["Users"],
   endpoints: (builder) => ({

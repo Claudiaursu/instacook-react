@@ -15,7 +15,7 @@ export const loginSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:8080/v1/auth", 
     //cta
-    baseUrl: "http://192.168.10.103:8080/v1/auth",
+    baseUrl: "http://192.168.10.102:8080/v1/auth",
   }),
   tagTypes: ["Login"],
   endpoints: (builder) => ({

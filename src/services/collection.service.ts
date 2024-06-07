@@ -26,7 +26,7 @@ export const collectionSlice = createApi({
   reducerPath: "collections",
   baseQuery: fetchBaseQuery({
     //baseUrl: "http://192.168.100.46:3333/v1/collections", //buc
-    baseUrl: "http://192.168.10.103:3333/v1/collections",
+    baseUrl: "http://192.168.10.102:3333/v1/collections",
   }),
   tagTypes: ["Collections"],
   refetchOnFocus: true,

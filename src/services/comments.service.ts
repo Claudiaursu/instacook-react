@@ -12,7 +12,7 @@ export const commentsSlice = createApi({
     //buc
     //baseUrl: "http://192.168.100.46:9083/v1/comments",
     //cta
-    baseUrl: "http://192.168.10.103:9083/v1/comments",
+    baseUrl: "http://192.168.10.102:9083/v1/comments",
   }),
   tagTypes: ["Comments"],
   endpoints: (builder) => ({
