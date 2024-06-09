@@ -74,7 +74,7 @@ const Cook = ({ navigation }: CookProps) => {
       value: "Extra hard"
     }]
 
-    const [newCollectionObj, setNewCollectionObj] = useState({
+  const [newCollectionObj, setNewCollectionObj] = useState({
     titluColectie: "",
     descriereColectie: "",
     publica: true,

@@ -3,18 +3,18 @@ import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
 import { RecipeDto } from "./types";
 
 type CollectionProps = {
-  titluColectie: string,
-  descriereColectie: string,
-  publica: boolean,
+  titluColectie?: string,
+  descriereColectie?: string,
+  publica?: boolean,
   calePoza?: string,
-  utilizator: number
+  utilizator?: number
 }
 
 export type CollectionDto = {
   id: string,
   titluColectie: string,
   descriereColectie: string,
-  publica: string,
+  publica: boolean,
   calePoza: string,
   retete: Array<RecipeDto>,
   deletedAt: number;
@@ -64,6 +64,17 @@ export const collectionSlice = createApi({
       }),
       invalidatesTags: ["Collections"],
     }),
+    editCollection: builder.mutation<undefined, { collection: CollectionProps, token: string, id: string} >({
+      query: ({collection, token, id}) => ({
+        url: `${id}`,
+        method: "PATCH",
+        body: collection,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Collections"],
+    }),
     deleteCollectionById: builder.mutation<undefined, { id: string, token: string }>({
       query: ({ id, token }) => ({
         url: `/${id}`,
@@ -81,5 +92,6 @@ export const {
   useAddNewCollectionMutation, 
   useGetCollectionsByUserIdQuery,
   useDeleteCollectionByIdMutation,
-  useGetPublicCollectionsByUserIdQuery
+  useGetPublicCollectionsByUserIdQuery,
+  useEditCollectionMutation
 } = collectionSlice;

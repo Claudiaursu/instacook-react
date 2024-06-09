@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, TouchableWithoutFeedback, TouchableOpacity, Modal, Switch } from 'react-native';
 import { Text } from '../../components/text';
-import { CollectionDto, useDeleteCollectionByIdMutation } from '../../services/collection.service';
-import { getDownloadURL, ref } from 'firebase/storage';
+import { CollectionDto, useDeleteCollectionByIdMutation, useEditCollectionMutation } from '../../services/collection.service';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from '../../utils/firebase/firebase';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -12,6 +12,9 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { TextInput } from "../../components/text-input";
 import * as ImagePicker from 'expo-image-picker';
+import uuid from 'react-native-uuid';
+import { ImagePickerSuccessResult } from "expo-image-picker";
+
 
 type CollectionProps = NativeStackScreenProps<ProfileStackParamList, "CollectionInfo">;
 
@@ -34,12 +37,23 @@ export const CollectionComponent = ({
   const [deleteCollectionById, { isSuccess: deleteCollectionSuccess }] = useDeleteCollectionByIdMutation();
   const [imageUrl, setImageUrl] = useState("");
   const { theme, activeScheme } = useThemeConsumer();
+  const loggedId = useSelector((state: RootState) => state.userData.loggedId);
 
   const [isVisible, setIsVisible] = useState(false);
   const [editTitle, setEditTitle] = useState(collection.titluColectie);
   const [editDescription, setEditDescription] = useState(collection.descriereColectie);
   const [isPrivateCollection, setIsPrivateCollection] = useState(!collection.publica);
   const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<string | null>(null);
+  const [selectedNewCollectionImageUri, setSelectedNewCollectionImageUri] = useState<ImagePickerSuccessResult>();
+
+  const [editCollection, {isSuccess: editCollectionSuccess }] = useEditCollectionMutation();
+
+  const [newCollectionObj, setNewCollectionObj] = useState({
+    titluColectie: collection.titluColectie,
+    descriereColectie: collection.descriereColectie,
+    publica: collection.publica,
+    calePoza: collection.calePoza
+  });
 
   const handleRedirect = () => {
     navigation.dispatch(CommonActions.navigate({ name: 'CollectionInfo', params: { collectionId: collection.id } }));
@@ -55,7 +69,96 @@ export const CollectionComponent = ({
 
     if (!result.canceled) {
       setSelectedCollectionImageUri(result.assets[0].uri);
+      setSelectedNewCollectionImageUri(result);
     }
+  }
+
+  const uploadImageAsync = async (uri: string, category: string) => {
+    const blob: Blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", uri, true);
+        xhr.send(null);
+    })
+    
+    const randomUUID = uuid.v4();
+    let imgPath = `${username}/${category}/${randomUUID}.jpg`;
+    if (category === 'collections') {
+      setNewCollectionObj({
+        ...newCollectionObj,
+        calePoza: imgPath
+      })
+    } else {
+      setNewCollectionObj({
+        ...newCollectionObj,
+        calePoza: imgPath
+      })
+    }
+    const fileRef = ref(getStorage(), imgPath);
+
+    try {
+      const metadata = {
+        contentType: 'image/jpeg'
+      };
+      
+      const result = await uploadBytesResumable(fileRef, blob, metadata);
+
+    } catch (error) {
+      console.log("ERROOOOOOOR ", error)
+    }
+
+    return imgPath;
+  }
+
+  const updateCollection = async function () {
+    let newCollection = newCollectionObj;
+    if (selectedNewCollectionImageUri) {
+      let imgPath = await uploadImageAsync(selectedNewCollectionImageUri.assets[0].uri, "collections");      
+      newCollection.calePoza = imgPath;
+    }
+
+    const collectionProps = {
+      ...newCollection,
+      //utilizator: loggedId
+    }
+
+    try {
+
+      const collectionCreateParams = {
+        collection: collectionProps,
+        token,
+        id: collection.id
+      }
+      const response: { data?: { id: string }; error?: any } = await editCollection(collectionCreateParams); // Adjust the type accordingly
+    } catch (error) {
+      console.log("eoare editare colectie: ", error)
+    } 
+
+    // setNewCollectionObj({
+    //   id: collection.id,
+    //   titluColectie: "",
+    //   descriereColectie: "",
+    //   publica: true,
+    //   calePoza: ""
+    // });
+    setIsVisible(false);
+  }
+
+  const closeModal = () => {
+    setIsVisible(false);
+    setNewCollectionObj({
+      titluColectie: collection.titluColectie,
+      descriereColectie: collection.descriereColectie,
+      publica: collection.publica,
+      calePoza: collection.calePoza
+    });
   }
 
   useEffect(() => {
@@ -211,8 +314,8 @@ export const CollectionComponent = ({
 
               <View style={{ marginTop: 10, alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                  <Button sx={{ margin: 10 }} variant="primary" onPress={() => setIsVisible(false)} title="Close" />
-                  <Button sx={{ margin: 10 }} variant="primary" onPress={() => { /* Add update functionality */ }} title="Submit" />
+                  <Button sx={{ margin: 10 }} variant="primary" onPress={() => closeModal()} title="Close" />
+                  <Button sx={{ margin: 10 }} variant="primary" onPress={() => { updateCollection() }} title="Submit" />
                 </View>
               </View>
             </View>
