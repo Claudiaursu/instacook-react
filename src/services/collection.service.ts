@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
-import { RecipeDto } from "./recipe.service";
+import { RecipeDto } from "./types";
 
 type CollectionProps = {
   titluColectie: string,
@@ -25,8 +25,8 @@ export type CollectionDto = {
 export const collectionSlice = createApi({
   reducerPath: "collections",
   baseQuery: fetchBaseQuery({
-    //baseUrl: "http://192.168.100.46:3333/v1/collections", //buc
-    baseUrl: "http://192.168.10.102:3333/v1/collections",
+    baseUrl: "http://192.168.100.46:3333/v1/collections", //buc
+    //baseUrl: "http://192.168.10.102:3333/v1/collections",
   }),
   tagTypes: ["Collections"],
   refetchOnFocus: true,

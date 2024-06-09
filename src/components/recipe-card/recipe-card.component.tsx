@@ -10,7 +10,7 @@ import { useThemeConsumer } from '../../utils/theme/theme.consumer';
 import { Button } from '../button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CommonActions, useNavigation } from '@react-navigation/native';
-import { RecipeSummaryDto } from '../../services/recipe.service';
+import { RecipeSummaryDto } from '../../services/types';
 
 export const RecipeCardComponent = (
   { recipe, isOwner }: { recipe: RecipeSummaryDto, isOwner: boolean },

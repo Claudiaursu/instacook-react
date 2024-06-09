@@ -11,14 +11,13 @@ export type NotificationDto = {
   updatedAt: number;
 };
 
-
 export const notificationSlice = createApi({
   reducerPath: "notifications",
   baseQuery: fetchBaseQuery({
     //buc
-    //baseUrl: "http://192.168.100.46:9083/v1/notifications",
+    baseUrl: "http://192.168.100.46:9083/v1/notifications",
     //cta
-    baseUrl: "http://192.168.10.102:9083/v1/notifications",
+    //baseUrl: "http://192.168.10.102:9083/v1/notifications",
   }),
   tagTypes: ["Notifications"],
   endpoints: (builder) => ({

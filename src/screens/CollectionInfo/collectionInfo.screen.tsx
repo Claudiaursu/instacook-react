@@ -17,8 +17,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAddNewCollectionMutation, useDeleteCollectionByIdMutation, useGetCollectionsByUserIdQuery } from "../../services/collection.service";
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { CollectionNavStackParamList } from "../../components/collection-list-wrapper/collection-list.navigator";
-import { RecipeDto, RecipeSummaryDto, useGetRecipesByCollectionIdQuery } from "../../services/recipe.service";
+import { RecipeDto, RecipeSummaryDto } from "../../services/types";
 import RecipeCardComponent from "../../components/recipe-card/recipe-card.component";
+import { useGetRecipesByCollectionIdQuery } from "../../services/recipe.service";
 
 type CollectionInfoProps = NativeStackScreenProps<CollectionNavStackParamList, "CollectionInfo">;
 

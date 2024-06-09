@@ -76,7 +76,7 @@ export const SearchComponent = ({navigation}: SearchComponentProps) => {
         autoCapitalize="none"
         autoCorrect={false}
         onChangeText={handleSearch}
-      />
+      /> 
       </View>
 
       <FlatList

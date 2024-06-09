@@ -1,67 +1,58 @@
 import { getDownloadURL, ref } from 'firebase/storage';
 import {
-  TextInput as NativeTextInput,
-  TextInputProps as NativeTextInputProps,
   StyleSheet,
-  TouchableOpacity
-} from "react-native";
-import { View, Image, Dimensions } from 'react-native';
-import { useEffect, useState } from "react";
+  TouchableOpacity,
+  View,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { useEffect, useState } from 'react';
 import { useThemeConsumer } from '../../utils/theme/theme.consumer';
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import { selectProfilePhotoValue, setValue } from '../../store/profilePhoto.slice';
-import { storage } from '../../utils/firebase/firebase';
-import { RootState, store } from '../../store/store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 import { Text } from '../text';
 import React from 'react';
-import { TextInput } from '../text-input';
-import { useGetUsersBySearchQuery } from '../../services/user-interaction.service';
 import { UserDto } from '../../services/user-interaction.service';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SearchStackParamList } from '../../screens/Search/navigator.types';
+import { storage } from '../../utils/firebase/firebase';
 
-export const SearchedUserComponent = (
-  {user, onPress}: { user: UserDto, onPress: () => void }
-) => {
-  
+export const SearchedUserComponent = ({ user, onPress }: { user: UserDto, onPress: () => void }) => {
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
-  const token = useSelector((state: RootState) => state.userData.token); 
-
-  const loggedUserFlag = loggedId === parseInt(user.id);
+  const [userImageUrl, setUserImageUrl] = useState('');
 
   useEffect(() => {
-  }, [])
+    const getUserPicture = async () => {
+      const path = user?.pozaProfil;
+      if (path) {
+        const imgRef = ref(storage, path);
+        const imgUrl = await getDownloadURL(imgRef);
+        setUserImageUrl(imgUrl);
+      }
+    };
+    getUserPicture();
+    console.log("user in search ", user)
+  }, [user]);
 
-  const {
-    theme,
-    activeScheme,
-    toggleThemeSchema
-  } = useThemeConsumer();
+  const { theme } = useThemeConsumer();
 
-  
-    return (
-      <TouchableOpacity onPress={onPress}>
+  return (
+    <TouchableOpacity onPress={onPress}>
       <View style={styles.container}>
-        <Text
-        sx={{
-          margin: 5,
-          textAlign: 'left'
-        }}
-        variant="subtitle"> {user?.nume} {user?.prenume} - id: {user?.id}
-      </Text>
-
-      <Text
-        sx={{
-          margin: 5,
-          textAlign: 'left'
-        }}
-        variant="subtitle"> {user?.username}
-      </Text>
-
+        {userImageUrl ? (
+          <Image source={{ uri: userImageUrl }} style={styles.profilePic} />
+        ) : (
+          <View style={styles.profilePicPlaceholder}></View>
+        )}
+        <View style={styles.textContainer}>
+          <Text sx={styles.username} variant="subtitle">
+            {user?.username}
+          </Text>
+          <Text sx={styles.fullName} variant="subtitle">
+            {user?.nume} {user?.prenume}
+          </Text>
+        </View>
       </View>
-      </TouchableOpacity>
-    );
-
+    </TouchableOpacity>
+  );
 };
 
 const { width } = Dimensions.get('window');
@@ -75,13 +66,9 @@ const styles = StyleSheet.create({
     marginHorizontal: CARD_MARGIN,
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F5EEF8',
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    // Removed shadow properties
   },
   profilePic: {
     width: 50,
@@ -89,8 +76,25 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
   },
+  profilePicPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ccc',
+    marginRight: 10,
+  },
+  textContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
   username: {
     fontSize: 16,
     fontWeight: 'bold',
   },
+  fullName: {
+    fontSize: 14,
+    color: '#555',
+  },
 });
+
+export default SearchedUserComponent;
