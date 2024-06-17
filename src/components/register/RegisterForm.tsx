@@ -11,6 +11,7 @@ import { useDoLoginMutation } from '../../services/auth.service';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import loginStyles from "./Register.styles";
+import { useAddNewUserMutation } from "../../services/user-interaction.service";
 
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -24,23 +25,10 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
   const { username, password, setLoginData } = useLoginFormContext();
   const { theme, activeScheme, toggleThemeSchema } = useThemeConsumer();
 
+  const [addNewUser, {isSuccess: newUserSuccess }] = useAddNewUserMutation();
   const [error, setError] = useState("");
   const clearError = () => setError("");
   const [doLogin, { isSuccess: loginSuccess }] = useDoLoginMutation();
-
-  const registerUser = async () => {
-    // Registration logic
-  };
-
-  const handleRegister = async () => {
-    try {
-      console.log("new user from form ", newUserObj)
-     
-      navigation.navigate("Login");
-    } catch (error) {
-     console.log(error)
-    }
-  };
 
   const [newUserObj, setNewUserObj] = useState({
     nume: "",
@@ -51,6 +39,29 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
     taraOrigine: "",
     telefon: ""
   });
+  const [confirmedPass, setConfirmedPass] = useState("");
+
+  const registerUser = async () => {
+    try {
+      const response: { data?: { id: string }; error?: any } = await addNewUser(newUserObj);
+      if ('data' in response) {
+        console.log("cont creat cu succes")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      console.log("new user from form ", newUserObj)
+      registerUser();
+      navigation.navigate("Login");
+    } catch (error) {
+     console.log(error)
+    }
+  };
+
 
   const setPrenume = (text: string) => {
     setNewUserObj({ ...newUserObj, prenume: text });
@@ -119,7 +130,7 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
           onChangeText={setParola}
         />
         <TextInput
-          value={newUserObj.parola}
+          value={confirmedPass}
           label="Confirm Password"
           secureTextEntry
           onChangeText={verifyPassword}

@@ -63,7 +63,7 @@ const styles = (colors: ThemeColors) =>
     },
     scrollContainer: {
       flexGrow: 1,
-      padding: 20,
+      //padding: 20,
     },
   });
 

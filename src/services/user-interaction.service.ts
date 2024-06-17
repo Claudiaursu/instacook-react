@@ -36,7 +36,7 @@ export type UserProps = {
   email: string;
   taraOrigine: string;
   telefon: string;
-  totalPuncte: number;
+  totalPuncte?: number;
 };
 
 export const userInteractionSlice = createApi({
