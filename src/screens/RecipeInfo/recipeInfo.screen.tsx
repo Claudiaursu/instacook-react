@@ -57,10 +57,12 @@ const RecipeInfo = ({ route, navigation }: RecipeInfoProps) => {
     const likeParams = {
       like: {
         reteta: {
-          id: recipeId
+          id: recipeId,
+          titluReteta: recipeData?.titluReteta
         },
         utilizator: {
-          id: loggedId
+          id: loggedId,
+          username: loggedUsername
         }
       },
       token

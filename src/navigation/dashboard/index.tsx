@@ -1,5 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useSelector } from "react-redux";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RootStackParamList } from "../navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
@@ -9,21 +10,27 @@ import Search from "../../screens/Search";
 import Cook from "../../screens/Cook";
 import ProfileNavigator from "../../screens/ProfileNavigator/profile-navigator.screen";
 import Notifications from "../../screens/Notifications";
+import { RootState } from "../../store/store";
+import TabIconWithBadge from "./notificationTabIcon";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export const Dashboard = () => {
+  const unseenNotifications = useSelector(
+    (state: RootState) => state.notificationsCount.unseenNotifications
+  );
   const {
     theme: {
       colors: { primary, secondary },
     },
   } = useThemeConsumer();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        // eslint-disable-next-line react/no-unstable-nested-components
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: any;
+          let iconName: keyof typeof Ionicons.glyphMap | undefined;
+
           if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Profile") {
@@ -34,8 +41,16 @@ export const Dashboard = () => {
             iconName = focused ? "pizza" : "pizza-outline";
           } else if (route.name === "Notifications") {
             iconName = focused ? "notifications" : "notifications-outline";
+            return (
+              <TabIconWithBadge
+                name={iconName}
+                badgeCount={unseenNotifications}
+                color={color}
+                size={size}
+              />
+            );
           }
-          // You can return any component that you like here!
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: primary,
@@ -45,8 +60,12 @@ export const Dashboard = () => {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="Cook" component={Cook} />
-      <Tab.Screen name="Notifications" component={Notifications}/>
-      <Tab.Screen name="Profile" component={ProfileNavigator} initialParams={{refresh: 1}}/>
+      <Tab.Screen name="Notifications" component={Notifications} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileNavigator}
+        initialParams={{ refresh: 1 }}
+      />
     </Tab.Navigator>
   );
 };

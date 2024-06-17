@@ -225,7 +225,7 @@ const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }
                                     sx={{ margin: 10 }}
                                     variant="profile"
                                     onPress={() => uploadPhoto()}
-                                    title={profilePhotoText} />
+                                    title="Edit profile" />
                             </View>
                         </View>
                     </View>

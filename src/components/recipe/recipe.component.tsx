@@ -32,11 +32,14 @@ export const RecipeComponent = (
     getPicture();
   }, [recipe.id, username]);
 
-  const { theme } = useThemeConsumer();
+    const {
+      theme,
+      activeScheme
+  } = useThemeConsumer(); 
 
   return (
     <View style={styles.card}>
-      <View style={{ alignItems: "center" }}>
+      <View style={{ alignItems: "center", backgroundColor: theme.colors.background2 }}>
         {imageUrl && (
           <Image
             source={{ uri: imageUrl }}
@@ -52,7 +55,9 @@ export const RecipeComponent = (
           />
         )}
       </View>
+      <View style={{backgroundColor: theme.colors.background2}}>
       <Text variant="subtitle" sx={styles.title}>{recipe.titluReteta}</Text>
+      </View>
       {isOwner && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={() => {
@@ -95,14 +100,15 @@ const styles = StyleSheet.create({
   title: {
     marginVertical: 8,
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontWeight: '400',
     fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginHorizontal: 8,
-    marginBottom: 8,
+    marginBottom: 4,
+    marginTop: 4
   },
 });
 

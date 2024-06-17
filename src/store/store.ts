@@ -8,6 +8,7 @@ import { recipeSlice } from "../services/recipe.service";
 import { userFollowingSlice } from "../services/following.service";
 import { likesSlice } from "../services/reactions.service";
 import { commentsSlice } from "../services/comments.service";
+import notificationCountSlice from "./notifications";
 import { notificationSlice } from "../services/notifications";
 
 export const store = configureStore({
@@ -17,6 +18,7 @@ export const store = configureStore({
     [userFollowingSlice.reducerPath]: userFollowingSlice.reducer,
     [likesSlice.reducerPath]: likesSlice.reducer,
     [userSlice.name]: userSlice.reducer,
+    [notificationCountSlice.name]: notificationCountSlice.reducer,
     [collectionSlice.reducerPath]: collectionSlice.reducer,
     [recipeSlice.reducerPath]: recipeSlice.reducer,
     [commentsSlice.reducerPath]: commentsSlice.reducer,

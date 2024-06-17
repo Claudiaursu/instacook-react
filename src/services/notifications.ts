@@ -11,6 +11,10 @@ export type NotificationDto = {
   updatedAt: number;
 };
 
+export type userIdParam = {
+  userId: string
+}
+
 export const notificationSlice = createApi({
   reducerPath: "notifications",
   baseQuery: fetchBaseQuery({
@@ -37,10 +41,39 @@ export const notificationSlice = createApi({
         },
       }),
     }),
+    // markAsSeenUserNotifications: builder.query<{status: number}, { id: number,  token: string}>({
+    //   query: ({ id, token }) => ({
+    //     url: `/users/seen/${id}`,
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   }),
+    // }),
+    markAsSeenUserNotifications: builder.mutation<undefined, {body: userIdParam, token: string}>({
+      query: ({body, token}) => ({
+        url: "/seen",
+        method: "POST",
+        body,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      //invalidatesTags: ["Following"],
+    }),
+    countUnseenNotifications: builder.query<{count: number}, { id: number,  token: string}>({
+      query: ({ id, token }) => ({
+        url: `/count/unseen/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   }),
 });
 
 export const { 
   useGetNotificationsByUserIdQuery,
-  useGetUnseenNotificationsByUserIdQuery
+  useGetUnseenNotificationsByUserIdQuery,
+  useMarkAsSeenUserNotificationsMutation,
+  useCountUnseenNotificationsQuery
 } = notificationSlice;

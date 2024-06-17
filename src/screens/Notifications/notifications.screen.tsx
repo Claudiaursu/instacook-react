@@ -1,14 +1,16 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useGetNotificationsByUserIdQuery } from "../../services/notifications";
+import { useCountUnseenNotificationsQuery, useGetNotificationsByUserIdQuery, useMarkAsSeenUserNotificationsMutation } from "../../services/notifications";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import moment from 'moment';
+import { updateunseenNotifications } from "../../store/notifications";
+import { useFocusEffect } from '@react-navigation/native';
 
 type NotificationProps = NativeStackScreenProps<RootStackParamList, "Notifications">;
 
@@ -19,12 +21,38 @@ const Notifications = ({ navigation }: NotificationProps) => {
 
   const userParams = { id: loggedId, token: token };
   const { data: notificationList, error, isLoading, refetch, isFetching } = useGetNotificationsByUserIdQuery(userParams);
+  
+  const [updateSeenNotifications, {isSuccess: updateSeenNotifSuccess }] = useMarkAsSeenUserNotificationsMutation();
 
   const { theme } = useThemeConsumer();
 
   const onRefresh = () => {
     refetch();
   };
+
+  const { data: notificationsData, refetch: refetchNotifications } = useCountUnseenNotificationsQuery(userParams, {
+    skip: !loggedId || !token,
+  });
+
+  useEffect(() => {
+    if (notificationsData) {
+      const notifCount = notificationsData.count ?? 0;
+      dispatch(updateunseenNotifications(notifCount));
+    }
+  }, [notificationsData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        dispatch(updateunseenNotifications(0));
+       
+        const body = {
+          userId: loggedId.toString()
+        }
+        updateSeenNotifications({body, token});
+      };
+    }, [dispatch])
+  );
 
   const renderNotificationText = (text: string) => {
     const parts = text.split(' ');
@@ -58,6 +86,21 @@ const Notifications = ({ navigation }: NotificationProps) => {
     }
   };
 
+  const getIconName = (categorie: string) => {
+    switch (categorie) {
+      case 'like':
+        return 'heart-outline';
+      case 'comentariu':
+        return 'chat-outline';
+      case 'following':
+        return 'account-outline'; // Suitable icon for 'following'
+      default:
+        return 'bell-outline'; // Default icon for other categories
+    }
+  };
+
+  const unseenNotifications = notificationList?.filter(notification => !notification.citita) || [];
+
   return (
     <ScrollView
       style={styles.container}
@@ -66,19 +109,25 @@ const Notifications = ({ navigation }: NotificationProps) => {
       }
     >
       <Text style={styles.sectionHeader}>New</Text>
-      {notificationList && notificationList
-        .filter(notification => !notification.citita)
-        .map(notification => (
+      {unseenNotifications.length === 0 ? (
+        <Text style={styles.noNewNotificationsText}>You don't have any new notifications</Text>
+      ) : (
+        unseenNotifications.map(notification => (
           <View key={notification.id} style={[styles.notification, styles.unseen]}>
             <View style={styles.textContainer}>
               {renderNotificationText(notification.text)}
               <Text style={styles.info}>{notification.info}</Text>
               <Text style={styles.timestamp}>{getTimeAgo(notification.createdAt)}</Text>
             </View>
-            <MaterialCommunityIcons name="alert-circle" size={24} color={theme.colors.primary} style={styles.icon} />
+            <MaterialCommunityIcons
+              name={getIconName(notification.categorie)}
+              size={24}
+              color={theme.colors.primary}
+              style={styles.icon}
+            />
           </View>
         ))
-      }
+      )}
 
       <Text style={styles.sectionHeader}>Earlier</Text>
       {notificationList && notificationList
@@ -90,6 +139,12 @@ const Notifications = ({ navigation }: NotificationProps) => {
               <Text style={styles.info}>{notification.info}</Text>
               <Text style={styles.timestamp}>{getTimeAgo(notification.createdAt)}</Text>
             </View>
+            <MaterialCommunityIcons
+              name={getIconName(notification.categorie)}
+              size={24}
+              color={theme.colors.primary}
+              style={styles.icon}
+            />
           </View>
         ))
       }
@@ -109,6 +164,13 @@ const styles = StyleSheet.create({
     color: '#000',
     marginVertical: 10,
   },
+  noNewNotificationsText: {
+    fontSize: 15,
+    color: '#555',
+    marginVertical: 10,
+    fontWeight: '300',
+    alignSelf: 'center'
+  },
   notification: {
     padding: 16,
     borderBottomWidth: 1,
@@ -117,13 +179,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     marginBottom: 10,
-    flexDirection: 'row', // Ensure the icon and text are on the same row
+    flexDirection: 'row',
   },
   unseen: {
-    backgroundColor: '#ffe6e6', // Light red background for unseen notifications
+    backgroundColor: '#ffe6e6',
   },
   textContainer: {
-    flex: 1, // Allow text container to take available space
+    flex: 1,
   },
   text: {
     fontSize: 16,
@@ -143,8 +205,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   icon: {
-    marginLeft: 10, // Space between the text container and the icon
-    alignSelf: 'center', // Align the icon vertically centered
+    marginLeft: 10,
+    alignSelf: 'center',
   },
 });
 

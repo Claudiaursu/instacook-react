@@ -89,11 +89,12 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   fullName: {
     fontSize: 14,
     color: '#555',
+    fontWeight: '300',
   },
 });
 

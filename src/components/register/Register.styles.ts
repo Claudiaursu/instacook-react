@@ -9,6 +9,8 @@ const styles = (colors: ThemeColors) =>
       marginLeft: "7%",
       flex: 1,
       marginTop: spacing(6),
+       // justifyContent: 'center',
+      // alignItems: 'center',
     },
     errorMessage: {
       marginTop: spacing(3),
@@ -58,6 +60,10 @@ const styles = (colors: ThemeColors) =>
     createNewAccount: {
       color: colors.primary,
       marginLeft: spacing(1),
+    },
+    scrollContainer: {
+      flexGrow: 1,
+      padding: 20,
     },
   });
 

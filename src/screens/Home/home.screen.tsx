@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RootStackParamList } from "../../navigation/navigator.types";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { View, ScrollView, TouchableOpacity, RefreshControl, StyleSheet } from 'react-native';
@@ -10,6 +10,8 @@ import { RootState } from "../../store/store";
 import { useGetFeedFollowRecipesForUserQuery, useGetFeedRecipesForUserQuery } from "../../services/recipe.service";
 import RecipePost from "../../components/recipe-post/recipe-post.component";
 import { Button } from "../../components/button";
+import { useCountUnseenNotificationsQuery } from "../../services/notifications";
+import { updateunseenNotifications } from "../../store/notifications";
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -20,6 +22,18 @@ const Home = ({ navigation }: HomeProps) => {
   const username = useSelector((state: RootState) => state.userData.username);
 
   const userParams = { id: loggedId, token: token };
+  
+  const { data: notificationsData, refetch: refetchNotifications } = useCountUnseenNotificationsQuery(userParams, {
+    skip: !loggedId || !token,
+  });
+
+  useEffect(() => {
+    if (notificationsData) {
+      const notifCount = notificationsData.count ?? 0;
+      dispatch(updateunseenNotifications(notifCount));
+    }
+  }, [notificationsData]);
+
   const { 
     data: recipeFollowList, 
     error: recipefollowError, 

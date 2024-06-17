@@ -141,13 +141,6 @@ export const CollectionComponent = ({
       console.log("eoare editare colectie: ", error)
     } 
 
-    // setNewCollectionObj({
-    //   id: collection.id,
-    //   titluColectie: "",
-    //   descriereColectie: "",
-    //   publica: true,
-    //   calePoza: ""
-    // });
     setIsVisible(false);
   }
 
@@ -353,7 +346,8 @@ const styles = (activeSchema: string) =>
     },
     textContainer: {
       flex: 1,
-      marginTop: 10
+      marginTop: 10,
+      justifyContent: 'space-between', // Ensure spacing is correct
     },
     description: {
       marginBottom: 5,
@@ -368,11 +362,14 @@ const styles = (activeSchema: string) =>
     },
     buttonsContainer: {
       flexDirection: 'row',
-      justifyContent: 'flex-start',
+      justifyContent: 'space-between', // Space between buttons
+      alignItems: 'center', // Center buttons
       marginTop: 10,
+      width: '60%', // Ensure container does not exceed the width of the image
+      alignSelf: 'center', // Center container
     },
     iconButton: {
-      marginLeft: 10,
+      // Ensure buttons are center-aligned within the container
     },
     modalContainer: {
       flex: 1,

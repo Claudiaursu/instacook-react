@@ -337,7 +337,8 @@ const Cook = ({ navigation }: CookProps) => {
 
 
   const {
-      theme
+      theme,
+      activeScheme
   } = useThemeConsumer();  
 
     return (
@@ -617,7 +618,7 @@ const Cook = ({ navigation }: CookProps) => {
           <View style={styles().modalContentRecipe}>
             <View style={{ alignItems: 'center', marginTop: 1, marginBottom: 10 }}>
               <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
-                Create your recipe
+                Edit your recipe
               </Text>
             </View>
             <View style={{ margin: 15 }}>
