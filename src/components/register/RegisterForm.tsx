@@ -25,7 +25,7 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
   const { username, password, setLoginData } = useLoginFormContext();
   const { theme, activeScheme, toggleThemeSchema } = useThemeConsumer();
 
-  const [addNewUser, {isSuccess: newUserSuccess }] = useAddNewUserMutation();
+  const [addNewUser, { isSuccess: newUserSuccess }] = useAddNewUserMutation();
   const [error, setError] = useState("");
   const clearError = () => setError("");
   const [doLogin, { isSuccess: loginSuccess }] = useDoLoginMutation();
@@ -40,6 +40,9 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
     telefon: ""
   });
   const [confirmedPass, setConfirmedPass] = useState("");
+  const [isReadyPass1, setIsReadyPass1] = useState(false);
+  const [isReadyPass2, setIsReadyPass2] = useState(false);
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
 
   const registerUser = async () => {
     try {
@@ -58,10 +61,9 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
       registerUser();
       navigation.navigate("Login");
     } catch (error) {
-     console.log(error)
+      console.log(error)
     }
   };
-
 
   const setPrenume = (text: string) => {
     setNewUserObj({ ...newUserObj, prenume: text });
@@ -77,6 +79,7 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
 
   const setParola = (text: string) => {
     setNewUserObj({ ...newUserObj, parola: text });
+    checkPasswordMatch(text, confirmedPass);
   };
 
   const setEmail = (text: string) => {
@@ -91,19 +94,22 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
     setNewUserObj({ ...newUserObj, telefon: text });
   };
 
-  const verifyPassword = (text: string) => {
-    const currentSetPassword = newUserObj.parola;
-    if (text !== currentSetPassword) {
-      console.log("Password does not match");
-    }
+  const setConfirmedPassMethod = (text: string) => {
+    setConfirmedPass(text);
+    checkPasswordMatch(newUserObj.parola, text);
+  };
+
+  const checkPasswordMatch = (password: string, confirmPassword: string) => {
+    const passwordMatch = password === confirmPassword;
+    setIsPasswordMatch(passwordMatch);
   };
 
   return (
     <SafeAreaView style={styles.authContainer}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Text sx={styles.signInLabel} variant="title">
-        Register
-      </Text>
+        <Text sx={styles.signInLabel} variant="title">
+          Register
+        </Text>
         
         <TextInput
           onFocus={clearError}
@@ -128,13 +134,20 @@ export const RegisterForm = ({ navigation }: RegisterProps) => {
           label="Password"
           secureTextEntry
           onChangeText={setParola}
+          onBlur={() => setIsReadyPass1(true)}
         />
         <TextInput
           value={confirmedPass}
           label="Confirm Password"
           secureTextEntry
-          onChangeText={verifyPassword}
+          onChangeText={setConfirmedPassMethod}
+          onBlur={() => setIsReadyPass2(true)}
         />
+
+        {!isPasswordMatch && isReadyPass1 && isReadyPass2 && (
+          <Text sx={{ ...styles.errorText, color: 'red' }}>Passwords do not match</Text>
+        )}
+
         <TextInput
           value={newUserObj.email}
           label="Email"

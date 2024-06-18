@@ -22,8 +22,9 @@ const styles = (colors: ThemeColors) =>
       marginBottom: spacing(5),
     },
     errorText: {
+      marginTop: spacing(3),
       color: colors.error,
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: "500",
     },
     signInButton: {
