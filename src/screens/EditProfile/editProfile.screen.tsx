@@ -1,16 +1,18 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useState } from "react";
-import { ScrollView, SafeAreaView, StyleSheet, View } from "react-native";
-import { RootStackParamList } from "../../navigation/navigator.types";
+import { ScrollView, SafeAreaView, StyleSheet, View, TouchableOpacity, Image } from "react-native";
 import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Button } from "../../components/button";
-import { Text } from "../../components/text";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useGetUserByUsernameQuery } from "../../services/user-interaction.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { TextInput } from "../../components/text-input";
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytesResumable } from "firebase/storage";
+import { getStorage } from "firebase/storage";
+import uuid from 'react-native-uuid';
+import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
 
 type ProfileEditProps = NativeStackScreenProps<ProfileStackParamList, "EditProfile">;
 
@@ -22,6 +24,7 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
 
   const { data: userData, refetch: refetchUserData } = useGetUserByUsernameQuery(username);
   const { theme } = useThemeConsumer();
+  const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<ImagePicker.ImagePickerResult | null>(null);
 
   const [formData, setFormData] = useState({
     nume: userData?.nume || '',
@@ -33,68 +36,136 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     telefon: userData?.telefon || '',
   });
 
-  const handleInputChange = (field: any, value: any) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const uploadImageAsync = async (uri: string, category: string) => {
+    const blob: Blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+
+    const randomUUID = uuid.v4();
+    let imgPath = `${username}/${category}/${randomUUID}.jpg`;
+
+    const fileRef = ref(getStorage(), imgPath);
+
+    try {
+      const metadata = {
+        contentType: 'image/jpeg',
+      };
+
+      await uploadBytesResumable(fileRef, blob, metadata);
+    } catch (error) {
+      console.log("ERROR ", error);
+    }
+
+    return imgPath;
+  };
+
+  const addCollectionPhoto = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedCollectionImageUri(result);
+    }
+  };
+
   const handleSave = () => {
-    //dispatch(updateUserProfile({ ...formData, token }));
+    // dispatch(updateUserProfile({ ...formData, token }));
     navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="Last Name"
-            value={formData.nume}
-            onChangeText={(text) => handleInputChange('nume', text)}
-          />
+        <View style={styles.formContainer}>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={addCollectionPhoto}>
+              {selectedCollectionImageUri && selectedCollectionImageUri.assets?.length ? (
+                <Image
+                  source={{ uri: selectedCollectionImageUri?.assets[0].uri}}
+                  style={styles.image}
+                />
+              ) : (
+                <UserPictureComponent photoPath={userData?.pozaProfil || ''} />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="Last Name"
+              value={formData.nume}
+              onChangeText={(text) => handleInputChange('nume', text)}
+            />
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="First name"
+              value={formData.prenume}
+              onChangeText={(text) => handleInputChange('prenume', text)}
+            />
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="Username"
+              value={formData.username}
+              onChangeText={(text) => handleInputChange('username', text)}
+            />
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="Email"
+              value={formData.email}
+              onChangeText={(text) => handleInputChange('email', text)}
+            />
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="Country"
+              value={formData.taraOrigine}
+              onChangeText={(text) => handleInputChange('taraOrigine', text)}
+            />
+          </View>
+          <View style={styles.formGroup}>
+            <TextInput
+              label="Phone"
+              value={formData.telefon}
+              onChangeText={(text) => handleInputChange('telefon', text)}
+            />
+          </View>
+          <View style={styles.buttonContainerSpecial}>
+            <View>
+              <Button title="Save Changes" onPress={handleSave} />
+            </View>
+          </View>
         </View>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="First name"
-            value={formData.prenume}
-            onChangeText={(text) => handleInputChange('prenume', text)}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="Username"
-            value={formData.username}
-            onChangeText={(text) => handleInputChange('username', text)}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="Email"
-            value={formData.email}
-            onChangeText={(text) => handleInputChange('email', text)}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="Country"
-            value={formData.taraOrigine}
-            onChangeText={(text) => handleInputChange('taraOrigine', text)}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <TextInput
-            label="Phone"
-            value={formData.telefon}
-            onChangeText={(text) => handleInputChange('telefon', text)}
-          />
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button title="Save Changes" onPress={handleSave} />
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button sx = {{backgroundColor: theme.colors.background2}} title="Reset Password" onPress={handleSave} />
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button sx = {{backgroundColor: theme.colors.cardTitle}} title="Delete account" onPress={handleSave} />
+        <View style={styles.separator} />
+        <View style={styles.footerButtons}>
+          <View style={styles.buttonContainer}>
+            <Button sx={{ backgroundColor: 'pink' }} title="Reset Password" onPress={handleSave} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button sx={{ backgroundColor: 'pink' }} title="Logout" onPress={handleSave} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button sx={{ backgroundColor: theme.colors.cardTitle }} title="Delete Account" onPress={handleSave} />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -107,6 +178,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#eafafa',
   },
   contentContainer: {
+    // padding: 16,
+  },
+  formContainer: {
+    backgroundColor: '#F5EEF8',
+    borderRadius: 10,
     padding: 16,
   },
   formGroup: {
@@ -122,6 +198,25 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 20,
     alignItems: 'center',
+  },
+  buttonContainerSpecial: {
+    marginTop: 5,
+    alignItems: 'center',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
+    // marginVertical: 20,
+  },
+  footerButtons: {
+    padding: 10,
+  },
+  image: {
+    borderRadius: 60,
+    height: 110,
+    width: 110,
+    marginBottom: 5,
+    // borderRadius: 50,
   },
 });
 
