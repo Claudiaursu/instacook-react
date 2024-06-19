@@ -23,11 +23,13 @@ import { SearchComponent } from "../../components/search/search.component";
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
 import { useGetRecipesByUserIdQuery } from "../../services/recipe.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 
 
 type ProfileProps = NativeStackScreenProps<ProfileStackParamList, "ProfilePage">;
 
 const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }) => {
+
     const username = useSelector((state: RootState) => state.userData.username);
     const loggedId = useSelector((state: RootState) => state.userData.loggedId);
     const token = useSelector((state: RootState) => state.userData.token);
@@ -38,12 +40,20 @@ const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }
 
     console.log("refresh primit ca param", refresh)
 
+    const navigationProfile = useNavigation();
+
+
     const dispatch = useDispatch();
     const { data: userData, refetch: refetchUserData } = useGetUserByUsernameQuery(username);
     const { data: recipesData, refetch: refetchRecipesData } = useGetRecipesByUserIdQuery({ id: loggedId, token });
 
     const profilePhotoText = userData?.pozaProfil === "profile_images/default.png" ? "Add photo" : "Edit photo";
     const recipeCount = recipesData ? recipesData.length : 0;
+
+    const handleRedirect = () => {
+        //navigationProfile.navigate({ name: 'EditProfile', params: { userId: loggedId } });
+        navigationProfile.dispatch(CommonActions.navigate({ name: 'EditProfile', params: { userId: loggedId} }));
+      }
 
     const uploadImageAsync = async (uri: string) => {
         const blob: Blob = await new Promise((resolve, reject) => {
@@ -224,7 +234,7 @@ const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }
                                 <Button
                                     sx={{ margin: 10 }}
                                     variant="profile"
-                                    onPress={() => uploadPhoto()}
+                                    onPress={() => handleRedirect()}
                                     title="Edit profile" />
                             </View>
                         </View>

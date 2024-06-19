@@ -13,6 +13,7 @@ import { ProfileStackParamList } from "./navigator.types";
 import CollectionInfo from "../CollectionInfo/collectionInfo.screen";
 import Profile from "../Profile/profile.screen";
 import RecipeInfo from "../RecipeInfo/recipeInfo.screen";
+import EditProfile from "../EditProfile/editProfile.screen";
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
@@ -33,6 +34,8 @@ export const ProfileNavigator = ({ route, navigation }: {route: any, navigation:
           <Stack.Screen name="ProfilePage" component={Profile} initialParams={{refresh: 1}}/>
           <Stack.Screen name="CollectionInfo" component={CollectionInfo} />
           <Stack.Screen name="RecipeInfo" component={RecipeInfo} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+
         </Stack.Navigator>
     );
 }
