@@ -5,14 +5,15 @@ import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Button } from "../../components/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useGetUserByUsernameQuery } from "../../services/user-interaction.service";
+import { useEditUserMutation, useGetUserByUsernameQuery } from "../../services/user-interaction.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { TextInput } from "../../components/text-input";
 import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import uuid from 'react-native-uuid';
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
+import { setValue } from "../../store/profilePhoto.slice";
 
 type ProfileEditProps = NativeStackScreenProps<ProfileStackParamList, "EditProfile">;
 
@@ -21,6 +22,8 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.userData.username);
   const token = useSelector((state: RootState) => state.userData.token);
+  const loggedId = useSelector((state: RootState) => state.userData.loggedId);
+
 
   const { data: userData, refetch: refetchUserData } = useGetUserByUsernameQuery(username);
   const { theme } = useThemeConsumer();
@@ -34,44 +37,46 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     email: userData?.email || '',
     taraOrigine: userData?.taraOrigine || '',
     telefon: userData?.telefon || '',
+    pozaProfil:  userData?.pozaProfil || '',
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const uploadImageAsync = async (uri: string, category: string) => {
+  const [editUser, {isSuccess: editUserSuccess }] = useEditUserMutation();
+
+  const uploadImageAsync = async (uri: string) => {
     const blob: Blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        console.log(e);
-        reject(new TypeError("Network request failed"));
-      };
-      xhr.responseType = "blob";
-      xhr.open("GET", uri, true);
-      xhr.send(null);
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+            console.log(e);
+            reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", uri, true);
+        xhr.send(null);
     });
 
-    const randomUUID = uuid.v4();
-    let imgPath = `${username}/${category}/${randomUUID}.jpg`;
-
+    const imgPath = `${username}/profile_image.jpg`;
     const fileRef = ref(getStorage(), imgPath);
 
     try {
-      const metadata = {
-        contentType: 'image/jpeg',
-      };
+        const metadata = {
+            contentType: 'image/jpeg'
+        };
 
-      await uploadBytesResumable(fileRef, blob, metadata);
+        const result = await uploadBytesResumable(fileRef, blob, metadata);
+        dispatch(setValue(imgPath))
+        return await getDownloadURL(fileRef);
+
     } catch (error) {
-      console.log("ERROR ", error);
+        console.log("ERROOOOOOOR ", error)
     }
-
-    return imgPath;
-  };
+}
 
   const addCollectionPhoto = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -82,12 +87,27 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     });
 
     if (!result.canceled) {
-      setSelectedCollectionImageUri(result);
+      await uploadImageAsync(result.assets[0].uri);
     }
   };
 
-  const handleSave = () => {
-    // dispatch(updateUserProfile({ ...formData, token }));
+  const handleSave = async () => {
+
+    const userProps = {
+      user: formData,
+      id: loggedId.toString(),
+      token
+    }
+
+    try {
+
+      const response: { data?: { id: string }; error?: any } = await editUser(userProps);
+      if (response && response.data && response.data.id) {
+        console.log("editat cu succes ", response)
+      }
+    } catch (error) {
+      console.log("eoare creare colectie: ", error)
+    } 
     navigation.goBack();
   };
 
@@ -97,7 +117,7 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
         <View style={styles.formContainer}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <TouchableOpacity onPress={addCollectionPhoto}>
-              {selectedCollectionImageUri && selectedCollectionImageUri.assets?.length ? (
+              {selectedCollectionImageUri && selectedCollectionImageUri.assets ? (
                 <Image
                   source={{ uri: selectedCollectionImageUri?.assets[0].uri}}
                   style={styles.image}

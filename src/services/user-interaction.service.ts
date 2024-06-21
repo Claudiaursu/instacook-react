@@ -37,6 +37,7 @@ export type UserProps = {
   taraOrigine: string;
   telefon: string;
   totalPuncte?: number;
+  pozaProfil?: string;
 };
 
 export const userInteractionSlice = createApi({
@@ -71,6 +72,17 @@ export const userInteractionSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    editUser: builder.mutation<undefined, { user: UserProps, token: string, id: string} >({
+      query: ({user, token, id}) => ({
+        url: `/${id}`,
+        method: "PATCH",
+        body: user,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -78,5 +90,6 @@ export const {
   useAddNewUserMutation, 
   useGetUserByUsernameQuery,
   useGetUsersBySearchQuery,
-  useGetUserByIdQuery 
+  useGetUserByIdQuery,
+  useEditUserMutation 
 } = userInteractionSlice
