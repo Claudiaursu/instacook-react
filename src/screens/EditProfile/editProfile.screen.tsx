@@ -24,10 +24,9 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
   const token = useSelector((state: RootState) => state.userData.token);
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
 
-
   const { data: userData, refetch: refetchUserData } = useGetUserByUsernameQuery(username);
   const { theme } = useThemeConsumer();
-  const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<ImagePicker.ImagePickerResult | null>(null);
+  const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     nume: userData?.nume || '',
@@ -37,46 +36,46 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     email: userData?.email || '',
     taraOrigine: userData?.taraOrigine || '',
     telefon: userData?.telefon || '',
-    pozaProfil:  userData?.pozaProfil || '',
+    pozaProfil: userData?.pozaProfil || '',
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const [editUser, {isSuccess: editUserSuccess }] = useEditUserMutation();
+  const [editUser, { isSuccess: editUserSuccess }] = useEditUserMutation();
 
   const uploadImageAsync = async (uri: string) => {
     const blob: Blob = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function () {
-            resolve(xhr.response);
-        };
-        xhr.onerror = function (e) {
-            console.log(e);
-            reject(new TypeError("Network request failed"));
-        };
-        xhr.responseType = "blob";
-        xhr.open("GET", uri, true);
-        xhr.send(null);
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
     });
 
     const imgPath = `${username}/profile_image.jpg`;
     const fileRef = ref(getStorage(), imgPath);
 
     try {
-        const metadata = {
-            contentType: 'image/jpeg'
-        };
+      const metadata = {
+        contentType: 'image/jpeg'
+      };
 
-        const result = await uploadBytesResumable(fileRef, blob, metadata);
-        dispatch(setValue(imgPath))
-        return await getDownloadURL(fileRef);
+      const result = await uploadBytesResumable(fileRef, blob, metadata);
+      dispatch(setValue(imgPath));
+      return await getDownloadURL(fileRef);
 
     } catch (error) {
-        console.log("ERROOOOOOOR ", error)
+      console.log("ERROOOOOOOR ", error);
     }
-}
+  };
 
   const addCollectionPhoto = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -87,27 +86,30 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     });
 
     if (!result.canceled) {
-      await uploadImageAsync(result.assets[0].uri);
+      const selectedUri = result.assets[0].uri;
+      setSelectedCollectionImageUri(selectedUri);
     }
   };
 
   const handleSave = async () => {
-
     const userProps = {
       user: formData,
       id: loggedId.toString(),
       token
-    }
+    };
 
     try {
+      if (selectedCollectionImageUri) {
+        await uploadImageAsync(selectedCollectionImageUri);
+      }
 
       const response: { data?: { id: string }; error?: any } = await editUser(userProps);
       if (response && response.data && response.data.id) {
-        console.log("editat cu succes ", response)
+        console.log("editat cu succes ", response);
       }
     } catch (error) {
-      console.log("eoare creare colectie: ", error)
-    } 
+      console.log("eoare creare colectie: ", error);
+    }
     navigation.goBack();
   };
 
@@ -117,9 +119,9 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
         <View style={styles.formContainer}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <TouchableOpacity onPress={addCollectionPhoto}>
-              {selectedCollectionImageUri && selectedCollectionImageUri.assets ? (
+              {selectedCollectionImageUri ? (
                 <Image
-                  source={{ uri: selectedCollectionImageUri?.assets[0].uri}}
+                  source={{ uri: selectedCollectionImageUri }}
                   style={styles.image}
                 />
               ) : (
