@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Modal, FlatList, ScrollView } from 'react-native';
 import { Text } from '../../components/text';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { storage } from '../../utils/firebase/firebase';
@@ -206,131 +206,125 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       <Modal visible={isEditModalVisible} animationType="slide" transparent>
         <View style={styles.modalEditContainer}>
           <View style={styles.modalEditContentRecipe}>
-            <View style={{ alignItems: 'center', marginTop: 1, marginBottom: 10 }}>
+            <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
               <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
                 Edit your recipe
               </Text>
-            </View>
-            <View style={{ margin: 15 }}>
-              <TextInput
-                label="Title"
-                keyboardType="default"
-                autoCapitalize="none"
-                autoCorrect={false}
-                style={{
-                  textAlign: 'left', // Align text to the left
-                  paddingLeft: 1, // Add left padding for better visual
-                  paddingTop: 7,
-                  paddingBottom: 25,
-                }}
-                textStyle={{
-                  color: theme.colors.cardTitle,
-                  fontSize: 14,
-                  fontWeight: "bold"
-                }}
-                value={editTitle}
-                onChangeText={(text) => {
-                  setEditTitle(text);
-                  setNewRecipeObj({ ...newRecipeObj, titluReteta: text });
-                }}
-              />
-              <TextInput
-                label="Ingredients"
-                placeholder="Enter ingredient ..."
-                keyboardType="default"
-                autoCapitalize="none"
-                autoCorrect={false}
-                style={{
-                  textAlign: 'left', // Align text to the left
-                  paddingLeft: 1, // Add left padding for better visual
-                  paddingTop: 7,
-                  paddingBottom: 25,
-                }}
-                textStyle={{
-                  color: theme.colors.cardTitle,
-                  fontSize: 14,
-                  fontWeight: "bold"
-                }}
-                value={currentIngredient}
-                onChangeText={setCurrentIngredient}
-                onSubmitEditing={() => {
-                  setEditIngrediente([...editIngrediente, currentIngredient]);
-                  setNewRecipeObj({ ...newRecipeObj, ingrediente: [...editIngrediente, currentIngredient] });
-                  setCurrentIngredient('');
-                }}
-              />
-              <FlatList
-                data={editIngrediente}
-                renderItem={({ item }) => (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text>{item}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const newIngredients = editIngrediente.filter((ing) => ing !== item);
-                        setEditIngrediente(newIngredients);
-                        setNewRecipeObj({ ...newRecipeObj, ingrediente: newIngredients });
-                      }}
-                    >
-                      <Ionicons name="close-circle" size={20} color={theme.colors.error} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                keyExtractor={(item, index) => index.toString()}
-              />
-              <TextInput
-                label="Instructions"
-                keyboardType="default"
-                autoCapitalize="none"
-                autoCorrect={false}
-                multiline={true}
-                numberOfLines={4}
-                style={{
-                  textAlign: 'left', // Align text to the left
-                  paddingLeft: 1, // Add left padding for better visual
-                  paddingTop: 7,
-                  paddingBottom: 25,
-                }}
-                textStyle={{
-                  color: theme.colors.cardTitle,
-                  fontSize: 14,
-                  fontWeight: "bold"
-                }}
-                value={editInstructiuni}
-                onChangeText={(text) => {
-                  setEditInstructiuni(text);
-                  setNewRecipeObj({ ...newRecipeObj, instructiuni: text });
-                }}
-              />
-              <DropdownComponent
-                data={recipeDificulties}
-                action={setDificultateRecipe}
-              />
-              {/* <View style={styles.photoContainer}>
-                <TouchableOpacity onPress={addRecipePhoto}>
-                  <Ionicons name="camera" size={24} color={theme.colors.primary} />
-                </TouchableOpacity>
-                {selectedRecipeImageUri && (
-                  <Image source={{ uri: selectedRecipeImageUri.uri }} style={styles.selectedImage} />
-                )}
-              </View> */}
-              <View style={{ marginTop: 15, marginBottom: 15 }}>
-                <Button
-                  title="Save Recipe"
-                  onPress={updateRecipe}
-                  variant="primary"
-                  color={theme.colors.primary}
-                  disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
+              <View style={{ margin: 15 }}>
+                <TextInput
+                  label="Title"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={{
+                    textAlign: 'left', // Align text to the left
+                    paddingLeft: 1, // Add left padding for better visual
+                    paddingTop: 7,
+                    paddingBottom: 25,
+                  }}
+                  textStyle={{
+                    color: theme.colors.cardTitle,
+                    fontSize: 14,
+                    fontWeight: "bold"
+                  }}
+                  value={editTitle}
+                  onChangeText={(text) => {
+                    setEditTitle(text);
+                    setNewRecipeObj({ ...newRecipeObj, titluReteta: text });
+                  }}
                 />
-              </View>
-              <View>
-                <Button
-                  title="Cancel"
-                  onPress={closeEditModal}
-                  variant="primary"
-                  color={theme.colors.primary}
+                <TextInput
+                  label="Ingredients"
+                  placeholder="Enter ingredient ..."
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={{
+                    textAlign: 'left', // Align text to the left
+                    paddingLeft: 1, // Add left padding for better visual
+                    paddingTop: 7,
+                    paddingBottom: 10, // Reduced paddingBottom for smaller space
+                    marginBottom: 5, // Reduced marginBottom for smaller space
+                  }}
+                  textStyle={{
+                    color: theme.colors.cardTitle,
+                    fontSize: 14,
+                    fontWeight: "bold"
+                  }}
+                  value={currentIngredient}
+                  onChangeText={setCurrentIngredient}
+                  onSubmitEditing={() => {
+                    setEditIngrediente([...editIngrediente, currentIngredient]);
+                    setNewRecipeObj({ ...newRecipeObj, ingrediente: [...editIngrediente, currentIngredient] });
+                    setCurrentIngredient('');
+                  }}
                 />
+                <FlatList
+                  data={editIngrediente}
+                  renderItem={({ item }) => (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text>{item}</Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const newIngredients = editIngrediente.filter((ing) => ing !== item);
+                          setEditIngrediente(newIngredients);
+                          setNewRecipeObj({ ...newRecipeObj, ingrediente: newIngredients });
+                        }}
+                      >
+                        <Ionicons name="close-circle" size={20} color={theme.colors.error} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                />
+                <TextInput
+                  label="Instructions"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  multiline={true}
+                  numberOfLines={4}
+                  style={{
+                    textAlign: 'left', // Align text to the left
+                    paddingLeft: 1, // Add left padding for better visual
+                    paddingTop: 7,
+                    paddingBottom: 25,
+                    marginTop: 10, // Reduced marginTop for smaller space
+                  }}
+                  textStyle={{
+                    color: theme.colors.cardTitle,
+                    fontSize: 14,
+                    fontWeight: "bold"
+                  }}
+                  value={editInstructiuni}
+                  onChangeText={(text) => {
+                    setEditInstructiuni(text);
+                    setNewRecipeObj({ ...newRecipeObj, instructiuni: text });
+                  }}
+                />
+                <DropdownComponent
+                  data={recipeDificulties}
+                  action={setDificultateRecipe}
+                />
+                <View style={{ marginTop: 15, marginBottom: 15 }}>
+                  <Button
+                    title="Save Recipe"
+                    onPress={updateRecipe}
+                    variant="primary"
+                    color={theme.colors.primary}
+                    disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
+                  />
+                </View>
+                <View>
+                  <Button
+                    title="Cancel"
+                    onPress={closeEditModal}
+                    variant="primary"
+                    color={theme.colors.primary}
+                  />
+                </View>
               </View>
-            </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -414,7 +408,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '90%',
     height: '90%', 
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

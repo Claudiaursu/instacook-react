@@ -679,16 +679,17 @@ const Cook = ({ navigation }: CookProps) => {
                     <View style={styles().ingredientPill}>
                       <Text sx={{ color: theme.colors.cardTitle }}>{item}</Text>
                       <Ionicons
-                        name="close-circle"
-                        size={20}
-                        color="pink"
-                        onPress={() => {
-                          setNewRecipeObj({
-                            ...newRecipeObj,
-                            ingrediente: newRecipeObj.ingrediente.filter((_, i) => i !== index),
-                          });
-                        }}
-                      />
+                      name="close-circle"
+                      size={20}
+                      color={theme.colors.error}
+                      onPress={() => {
+                        setNewRecipeObj({
+                          ...newRecipeObj,
+                          ingrediente: newRecipeObj.ingrediente.filter((_, i) => i !== index),
+                        });
+                      }}
+                    />
+
                       
                     </View>
                   )}
