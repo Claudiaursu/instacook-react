@@ -73,6 +73,17 @@ export const recipeSlice = createApi({
       }),
       invalidatesTags: ["Recipes"],
     }),
+    editRecipe: builder.mutation<undefined, { recipe: RecipeProps, token: string, id: string} >({
+      query: ({recipe, token, id}) => ({
+        url: `${id}`,
+        method: "PATCH",
+        body: recipe,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
   }),
 });
 
@@ -83,5 +94,6 @@ export const {
   useGetRecipeByIdQuery,
   useGetFeedFollowRecipesForUserQuery,
   useGetFeedRecipesForUserQuery,
-  useDeleteRecipeByIdMutation
+  useDeleteRecipeByIdMutation,
+  useEditRecipeMutation
 } = recipeSlice;

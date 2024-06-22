@@ -618,7 +618,7 @@ const Cook = ({ navigation }: CookProps) => {
           <View style={styles().modalContentRecipe}>
             <View style={{ alignItems: 'center', marginTop: 1, marginBottom: 10 }}>
               <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
-                Edit your recipe
+                Create your recipe
               </Text>
             </View>
             <View style={{ margin: 15 }}>

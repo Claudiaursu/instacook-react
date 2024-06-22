@@ -127,7 +127,6 @@ export const CollectionComponent = ({
 
     const collectionProps = {
       ...newCollection,
-      //utilizator: loggedId
     }
 
     try {

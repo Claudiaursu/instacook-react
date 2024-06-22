@@ -46,7 +46,7 @@ export type RecipeProps = {
   instructiuni: string,
   ingrediente: Array<string>,
   calePoza?: string,
-  colectie: object
+  colectie?: object
 }
 
 export type RecipeDto = {

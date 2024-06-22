@@ -3,10 +3,10 @@ import { View, FlatList, ScrollView, StyleSheet, RefreshControl } from 'react-na
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { useGetRecipesByUserIdQuery } from '../../services/recipe.service';
-import RecipeComponent from '../recipe/recipe.component';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { TabViewProfileParamList } from '../tab-view-profile/tab-view-profile.types';
 import { RecipeDto } from '../../services/types';
+import { RecipeComponent } from '../recipe/recipe.component';
 
 type RecipeListProps = NativeStackScreenProps<TabViewProfileParamList, "Recipes">;
 
