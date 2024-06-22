@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, FlatList, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -14,16 +14,28 @@ const RecipeList = ({ route, navigation }: { route: any; navigation: RecipeListP
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
   const token = useSelector((state: RootState) => state.userData.token);
   const { userId } = route.params;
-
+  
   const { data, error, isLoading, refetch } = useGetRecipesByUserIdQuery({ id: userId, token });
+  const [recipeDataList, setRecipeDataList] = useState<RecipeDto[]>(data ? data : []);
 
   const renderItem = ({ item }: { item: RecipeDto }) => {
     let isOwner = false;
     if (loggedId === userId) {
       isOwner = true;
     }
-    return <RecipeComponent recipe={item} isOwner={isOwner} />
+    return <RecipeComponent recipe={item} isOwner={isOwner} handleDeleteUpdates={handleDeleteUpdates}/>
   };
+
+  const handleDeleteUpdates = (recipeId: any) => {
+    const newRecipeList = recipeDataList?.filter(recipe => recipe.id != recipeId);
+    setRecipeDataList(newRecipeList);
+  }
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setRecipeDataList(data);
+    }
+}, [data]);
 
   return (
     <ScrollView
@@ -31,10 +43,10 @@ const RecipeList = ({ route, navigation }: { route: any; navigation: RecipeListP
       refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
     >
       <FlatList
-        data={data}
+        data={recipeDataList as RecipeDto[] | undefined}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2} // Display two columns
+        numColumns={2} 
         contentContainerStyle={styles.listContainer}
       />
     </ScrollView>

@@ -63,6 +63,16 @@ export const recipeSlice = createApi({
       }),
       invalidatesTags: ["Recipes"],
     }),
+    deleteRecipeById: builder.mutation<undefined, { id: string, token: string }>({
+      query: ({ id, token }) => ({
+        url: `/${id}`,
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
   }),
 });
 
@@ -72,5 +82,6 @@ export const {
   useGetRecipesByCollectionIdQuery,
   useGetRecipeByIdQuery,
   useGetFeedFollowRecipesForUserQuery,
-  useGetFeedRecipesForUserQuery
+  useGetFeedRecipesForUserQuery,
+  useDeleteRecipeByIdMutation
 } = recipeSlice;

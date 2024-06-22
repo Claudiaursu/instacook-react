@@ -394,28 +394,24 @@ const styles = (activeSchema: string) =>
     },
     modalContentRecipe: {
       backgroundColor:"#ffe6e6",
-      padding: 30, // Increase padding to make the modal bigger
+      padding: 30, 
       borderRadius: 10,
-      width: '90%', // Adjust the width as needed
+      width: '90%', 
       height: '80%',
       justifyContent: 'center',
-      //alignItems: 'center'
     },
     modalContentCollection: {
       backgroundColor:"#ffe6e6",
-      padding: 30, // Increase padding to make the modal bigger
+      padding: 30, 
       borderRadius: 10,
-      width: '90%', // Adjust the width as needed
-     // height: '50%',
+      width: '90%', 
       justifyContent: 'center',
-      //alignItems: 'center'
     },
     imagePicker: {
       borderRadius: 60,
       height: 110,
       width: 110,
       marginBottom: 5,
-      //borderRadius: 50, 
     },
     image: {
       borderRadius: 10,
