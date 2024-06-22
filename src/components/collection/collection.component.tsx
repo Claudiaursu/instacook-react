@@ -40,6 +40,7 @@ export const CollectionComponent = ({
   const loggedId = useSelector((state: RootState) => state.userData.loggedId);
 
   const [isVisible, setIsVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [editTitle, setEditTitle] = useState(collection.titluColectie);
   const [editDescription, setEditDescription] = useState(collection.descriereColectie);
   const [isPrivateCollection, setIsPrivateCollection] = useState(!collection.publica);
@@ -217,7 +218,7 @@ export const CollectionComponent = ({
                   <TouchableOpacity onPress={() => setIsVisible(true)} style={styles(activeScheme).iconButton}>
                     <MaterialCommunityIcons name="pencil-outline" size={24} color={theme.colors.primary} />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={deleteCollection} style={styles(activeScheme).iconButton}>
+                  <TouchableOpacity onPress={() => setIsDeleteModalVisible(true)} style={styles(activeScheme).iconButton}>
                     <MaterialCommunityIcons name="delete-outline" size={24} color={theme.colors.primary} />
                   </TouchableOpacity>
                 </View>
@@ -310,6 +311,20 @@ export const CollectionComponent = ({
                   <Button sx={{ margin: 10 }} variant="primary" onPress={() => closeModal()} title="Close" />
                   <Button sx={{ margin: 10 }} variant="primary" onPress={() => { updateCollection() }} title="Submit" />
                 </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal visible={isDeleteModalVisible} animationType="slide" transparent>
+          <View style={styles(activeScheme).modalContainer}>
+            <View style={styles(activeScheme).modalContentCollection}>
+              <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center', fontSize: 18, color: theme.colors.cardTitle }}>
+                Are you sure you want to delete collection {collection.titluColectie}?
+              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Button sx={{ margin: 10 }} variant="primary" onPress={() => setIsDeleteModalVisible(false)} title="No" />
+                <Button sx={{ margin: 10 }} variant="primary" onPress={() => { deleteCollection(); setIsDeleteModalVisible(false); }} title="Yes" />
               </View>
             </View>
           </View>
