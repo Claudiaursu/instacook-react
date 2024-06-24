@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Modal, FlatList, ScrollView } from 'react-native';
 import { Text } from '../../components/text';
-import { getDownloadURL, ref } from 'firebase/storage';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from '../../utils/firebase/firebase';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -13,7 +13,7 @@ import { useDeleteRecipeByIdMutation, useEditRecipeMutation } from '../../servic
 import { Button } from '../button';
 import { TextInput } from '../text-input';
 import * as ImagePicker from 'expo-image-picker';
-import { v4 as uuid } from 'uuid';
+import uuid from 'react-native-uuid';
 import DropdownComponent from '../dropdown/dropdown.component';
 import { CollectionDto, useGetCollectionsByUserIdQuery } from '../../services/collection.service';
 
@@ -38,7 +38,9 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
   const [editCalePoza, setEditCalePoza] = useState(recipe.calePoza);
   const [currentIngredient, setCurrentIngredient] = useState('');
 
-  const [selectedRecipeImageUri, setSelectedRecipeImageUri] = useState<any>();
+  // const [selectedRecipeImageUri, setSelectedCollectionImageUri] = useState<string | null>(null);
+
+  const [selectedRecipeImageUri, setSelectedRecipeImageUri] = useState<any>("");
 
   const userParams = {
     id: loggedId,
@@ -73,6 +75,7 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
         const imgUrl = await getDownloadURL(imgRef);
         setImageUrl(imgUrl);
         console.log("IMAGINE RETETA ", imgUrl)
+        setSelectedRecipeImageUri(imgUrl)
       }
     };
 
@@ -98,18 +101,25 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
 
   const updateRecipe = async () => {
     let newRecipe = { ...newRecipeObj };
-    if (selectedRecipeImageUri) {
-      let imgPath = await uploadImageAsync(selectedRecipeImageUri.uri, "recipes");
-      newRecipe.calePoza = imgPath;
+    console.log("a intrat in fct de edit !!!!!!!!!!! ", newRecipe)
+    
+    if (selectedRecipeImageUri && selectedRecipeImageUri != imageUrl) {
+      console.log("a intrat in fct de edit IF ", selectedRecipeImageUri)
+      let imgPath = await uploadImageAsync(selectedRecipeImageUri, "recipes");
+      if (imgPath){
+        newRecipe.calePoza = imgPath;
+      }
     }
 
     const recipeProps = { ...newRecipe };
+    console.log("recipe props !!!!!!!!!!! ", recipeProps)
     const editRecipeParams = { recipe: recipeProps, token, id: recipe.id };
 
     try {
       await editRecipe(editRecipeParams);
-      handleDeleteUpdates(recipe.id); // Assuming this refreshes the recipe list
+      //handleDeleteUpdates(recipe.id); // Assuming this refreshes the recipe list
       setIsEditModalVisible(false);
+      //setImageUrl(newRecipe.calePoza)
     } catch (error) {
       console.log(error);
     }
@@ -130,9 +140,12 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
     });
 
     setEditIngrediente(recipe.ingrediente)
+    setSelectedRecipeImageUri(imageUrl)
   }
 
   const uploadImageAsync = async (uri: string, category: string) => {
+    let imgPath;
+    try {
     const blob: Blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -146,14 +159,15 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       xhr.open("GET", uri, true);
       xhr.send(null);
     })
-    
-    const randomUUID = uuid();
-    let imgPath = `${username}/${category}/${randomUUID}.jpg`;
-    const fileRef = ref(storage, imgPath);
 
-    try {
+    console.log("BLOB", blob)
+    
+    const randomUUID = uuid.v4();
+    imgPath = `${username}/${category}/${randomUUID}.jpg`;
+    const fileRef = ref(getStorage(), imgPath);
+    
       const metadata = { contentType: 'image/jpeg' };
-      //await uploadBytesResumable(fileRef, blob, metadata);
+      await uploadBytesResumable(fileRef, blob, metadata);
     } catch (error) {
       console.log("ERROR ", error);
     }
@@ -170,7 +184,7 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
     });
 
     if (!result.canceled) {
-      setSelectedRecipeImageUri(result);
+      setSelectedRecipeImageUri(result.assets[0].uri);
     }
   }
 
@@ -346,6 +360,26 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                 initialSelection={recipe.colectie.id?.toString() || ""}
               />
 
+
+            <View style={{ alignItems: 'center', alignContent: 'center'}}>
+                {selectedRecipeImageUri ? (
+                  <TouchableOpacity onPress={addRecipePhoto}>
+                    <Image
+                      source={{ uri: selectedRecipeImageUri }}
+                      style={styles.imagePicker}
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity onPress={addRecipePhoto}>
+                    <MaterialCommunityIcons
+                      name="image-outline"
+                      size={50}
+                      color={theme.colors.primary}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+
              <View style={styles.modalButtons}>
               <View style={{margin: 10, alignItems: 'center'}}>
                 <Button
@@ -353,7 +387,7 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                       onPress={updateRecipe}
                       variant="primary"
                       color={theme.colors.primary}
-                      disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
+                      //disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
                     />
                 </View>
                 <View style={{margin: 10,  alignItems: 'center'}}>
@@ -433,7 +467,7 @@ const styles = StyleSheet.create({
     backgroundColor:"#ffe6e6",
     padding: 30,
     borderRadius: 10,
-width: '90%',
+  width: '90%',
     height: '25%', 
     justifyContent: 'center',
     alignItems: 'center',
@@ -456,6 +490,12 @@ width: '90%',
     borderRadius: 10,
   width: '90%',
     height: '90%',
+  },
+  imagePicker: {
+    borderRadius: 60,
+    height: 110,
+    width: 110,
+    marginBottom: 5,
   },
 });
 
