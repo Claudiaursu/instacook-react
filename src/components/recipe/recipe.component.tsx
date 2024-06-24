@@ -67,15 +67,25 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
     { id: 4, value: "Extra hard" }
   ];
 
+
+  const updatePhotoToDisplay = async (path: string) => {
+    const imgRef = ref(storage, path);
+    const imgUrl = await getDownloadURL(imgRef);
+    setImageUrl(imgUrl);
+    console.log("IMAGINE RETETA ", imgUrl)
+    setSelectedRecipeImageUri(imgUrl)
+  }
+
   useEffect(() => {
     const getPicture = async () => {
       const path = recipe.calePoza;
       if (path) {
-        const imgRef = ref(storage, path);
-        const imgUrl = await getDownloadURL(imgRef);
-        setImageUrl(imgUrl);
-        console.log("IMAGINE RETETA ", imgUrl)
-        setSelectedRecipeImageUri(imgUrl)
+        // const imgRef = ref(storage, path);
+        // const imgUrl = await getDownloadURL(imgRef);
+        // setImageUrl(imgUrl);
+        // console.log("IMAGINE RETETA ", imgUrl)
+        // setSelectedRecipeImageUri(imgUrl)
+        await updatePhotoToDisplay(path);
       }
     };
 
@@ -119,7 +129,10 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       await editRecipe(editRecipeParams);
       //handleDeleteUpdates(recipe.id); // Assuming this refreshes the recipe list
       setIsEditModalVisible(false);
-      //setImageUrl(newRecipe.calePoza)
+      if (selectedRecipeImageUri && selectedRecipeImageUri != imageUrl) {
+        console.log("trebuie schimbata poza....")
+        await updatePhotoToDisplay(newRecipe.calePoza);
+      }
     } catch (error) {
       console.log(error);
     }
