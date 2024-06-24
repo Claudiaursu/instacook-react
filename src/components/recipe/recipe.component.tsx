@@ -230,10 +230,10 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       <Modal visible={isEditModalVisible} animationType="slide" transparent>
         <View style={styles.modalEditContainer}>
           <View style={styles.modalEditContentRecipe}>
-            <ScrollView contentContainerStyle={{ alignItems: 'baseline' }}>
+            <ScrollView>
               <View style={{alignItems: 'center'}}>
-                <View>
-                <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text variant="title" sx={{ marginBottom: 20, justifyContent: 'center' }}>
                   Edit your recipe
                 </Text>
                 </View>
@@ -274,8 +274,7 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                     textAlign: 'left', // Align text to the left
                     paddingLeft: 1, // Add left padding for better visual
                     paddingTop: 7,
-                    paddingBottom: 10, // Reduced paddingBottom for smaller space
-                    marginBottom: 5, // Reduced marginBottom for smaller space
+                    paddingBottom: 7, // Reduced paddingBottom for smaller space
                   }}
                   textStyle={{
                     color: theme.colors.cardTitle,
@@ -290,6 +289,7 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                     setCurrentIngredient('');
                   }}
                 />
+              <View style={{marginBottom: 20}}>
                 <FlatList
                   data={editIngrediente}
                   renderItem={({ item }) => (
@@ -301,14 +301,13 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                           setEditIngrediente(newIngredients);
                           setNewRecipeObj({ ...newRecipeObj, ingrediente: newIngredients });
                         }}
-                      >
+                        >
                         <Ionicons name="close-circle" size={20} color={theme.colors.error} />
                       </TouchableOpacity>
                     </View>
                   )}
-                  keyExtractor={(item, index) => index.toString()}
-                />
-
+                  keyExtractor={(item, index) => index.toString()} />
+              </View>
              
                 <TextInput
                   label="Instructions"
@@ -348,16 +347,16 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
               />
 
              <View style={styles.modalButtons}>
-              <View style={{margin:10}}>
-                    <Button
+              <View style={{margin: 10, alignItems: 'center'}}>
+                <Button
                       title="Save"
                       onPress={updateRecipe}
                       variant="primary"
                       color={theme.colors.primary}
                       disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
                     />
-                  </View>
-                  <View style={{margin:10}}>
+                </View>
+                <View style={{margin: 10,  alignItems: 'center'}}>
                   <Button
                       title="Cancel"
                       onPress={closeEditModal}
@@ -441,8 +440,8 @@ width: '90%',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    //width: '100%',
+    justifyContent: 'center', 
+    alignItems: 'center' ,
     margin: 20,
   },
   modalEditContainer: {
