@@ -230,11 +230,15 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       <Modal visible={isEditModalVisible} animationType="slide" transparent>
         <View style={styles.modalEditContainer}>
           <View style={styles.modalEditContentRecipe}>
-            <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-              <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
-                Edit your recipe
-              </Text>
-              <View style={{ margin: 15 }}>
+            <ScrollView contentContainerStyle={{ alignItems: 'baseline' }}>
+              <View style={{alignItems: 'center'}}>
+                <View>
+                <Text variant="title" sx={{ marginBottom: 15, justifyContent: 'center' }}>
+                  Edit your recipe
+                </Text>
+                </View>
+              </View>
+              <View>
               <TextInput
                 label="Title"
                   keyboardType="default"
