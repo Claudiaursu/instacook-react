@@ -343,23 +343,25 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                 initialSelection={recipe.colectie.id?.toString() || ""}
               />
 
-              <View style={{ marginTop: 15, marginBottom: 15 }}>
+             <View style={styles.modalButtons}>
+              <View style={{margin:10}}>
+                    <Button
+                      title="Save"
+                      onPress={updateRecipe}
+                      variant="primary"
+                      color={theme.colors.primary}
+                      disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
+                    />
+                  </View>
+                  <View style={{margin:10}}>
                   <Button
-                    title="Save Recipe"
-                    onPress={updateRecipe}
-                    variant="primary"
-                    color={theme.colors.primary}
-                    disabled={!editTitle || !editDificultate || !editIngrediente.length || !editInstructiuni}
-                  />
+                      title="Cancel"
+                      onPress={closeEditModal}
+                      variant="primary"
+                      color={theme.colors.primary}
+                    />
                 </View>
-                <View>
-                <Button
-                    title="Cancel"
-                    onPress={closeEditModal}
-                    variant="primary"
-                    color={theme.colors.primary}
-                  />
-              </View>
+             </View>
 
             </ScrollView>
           </View>
@@ -436,8 +438,8 @@ width: '90%',
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 20,
+    //width: '100%',
+    margin: 20,
   },
   modalEditContainer: {
     flex: 1,
