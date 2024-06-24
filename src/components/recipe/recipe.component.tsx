@@ -15,13 +15,14 @@ import { TextInput } from '../text-input';
 import * as ImagePicker from 'expo-image-picker';
 import { v4 as uuid } from 'uuid';
 import DropdownComponent from '../dropdown/dropdown.component';
-
+import { CollectionDto, useGetCollectionsByUserIdQuery } from '../../services/collection.service';
 
 export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { recipe: RecipeDto, isOwner: boolean, handleDeleteUpdates: any }) => {
   const navigation = useNavigation();
   const recipeDate = new Date(recipe.createdAt);
   const username = useSelector((state: RootState) => state.userData.username);
   const token = useSelector((state: RootState) => state.userData.token);
+  const loggedId = useSelector((state: RootState) => state.userData.loggedId);
 
   const [imageUrl, setImageUrl] = useState('');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -39,12 +40,22 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
 
   const [selectedRecipeImageUri, setSelectedRecipeImageUri] = useState<any>();
 
+  const userParams = {
+    id: loggedId,
+    token: token
+  }
+  const { data: collectionList, error, isLoading } = useGetCollectionsByUserIdQuery(userParams);
+  console.log(" collectionList", )
+
   const [newRecipeObj, setNewRecipeObj] = useState({
     titluReteta: recipe.titluReteta,
     dificultate: recipe.dificultate,
     ingrediente: recipe.ingrediente || [],
     instructiuni: recipe.instructiuni,
-    calePoza: recipe.calePoza
+    calePoza: recipe.calePoza,
+    colectie: {
+      id: recipe.colectie.id
+    }
   });
 
   const recipeDificulties = [
@@ -112,8 +123,13 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
       dificultate: recipe.dificultate,
       ingrediente: recipe.ingrediente,
       instructiuni: recipe.instructiuni,
-      calePoza: recipe.calePoza
+      calePoza: recipe.calePoza,
+      colectie: {
+        id: recipe.colectie.id
+      }
     });
+
+    setEditIngrediente(recipe.ingrediente)
   }
 
   const uploadImageAsync = async (uri: string, category: string) => {
@@ -166,6 +182,14 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
     setEditDificultate(text)
   }
 
+  const setColectieRecipe = function (id: number) {
+    setNewRecipeObj({
+      ...newRecipeObj,
+      colectie: {
+        id: id.toString(),
+      }
+    })
+  }
 
   return (
     <View style={styles.card}>
@@ -211,8 +235,8 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                 Edit your recipe
               </Text>
               <View style={{ margin: 15 }}>
-                <TextInput
-                  label="Title"
+              <TextInput
+                label="Title"
                   keyboardType="default"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -232,8 +256,11 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                     setEditTitle(text);
                     setNewRecipeObj({ ...newRecipeObj, titluReteta: text });
                   }}
-                />
-                <TextInput
+              />
+              </View>
+
+
+              <TextInput
                   label="Ingredients"
                   placeholder="Enter ingredient ..."
                   keyboardType="default"
@@ -277,6 +304,8 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                   )}
                   keyExtractor={(item, index) => index.toString()}
                 />
+
+             
                 <TextInput
                   label="Instructions"
                   keyboardType="default"
@@ -303,10 +332,18 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                   }}
                 />
                 <DropdownComponent
-                  data={recipeDificulties}
-                  action={setDificultateRecipe}
-                />
-                <View style={{ marginTop: 15, marginBottom: 15 }}>
+                data={recipeDificulties}
+                action={setDificultateRecipe}
+                initialSelection={recipe.dificultate}
+              />
+
+              <DropdownComponent
+                data={collectionList ? collectionList.map(collection => ({ id: collection.id, titluColectie: collection.titluColectie })) as CollectionDto[] : []}
+                action={setColectieRecipe}
+                initialSelection={recipe.colectie.id?.toString() || ""}
+              />
+
+              <View style={{ marginTop: 15, marginBottom: 15 }}>
                   <Button
                     title="Save Recipe"
                     onPress={updateRecipe}
@@ -316,14 +353,14 @@ export const RecipeComponent = ({ recipe, isOwner, handleDeleteUpdates }: { reci
                   />
                 </View>
                 <View>
-                  <Button
+                <Button
                     title="Cancel"
                     onPress={closeEditModal}
                     variant="primary"
                     color={theme.colors.primary}
                   />
-                </View>
               </View>
+
             </ScrollView>
           </View>
         </View>
@@ -391,10 +428,16 @@ const styles = StyleSheet.create({
     backgroundColor:"#ffe6e6",
     padding: 30,
     borderRadius: 10,
-    width: '90%',
+width: '90%',
     height: '25%', 
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
   },
   modalEditContainer: {
     flex: 1,
@@ -406,7 +449,9 @@ const styles = StyleSheet.create({
     backgroundColor:"#ffe6e6",
     padding: 30,
     borderRadius: 10,
-    width: '90%',
-    height: '90%', 
+  width: '90%',
+    height: '90%',
   },
 });
+
+export default RecipeComponent;

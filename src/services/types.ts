@@ -61,7 +61,10 @@ export type RecipeDto = {
   deletedAt: number;
   createdAt: number;
   updatedAt: number;
-  colectie: string;
+  colectie: {
+    id?: string
+    utilizator?: string
+  }
 };
 
 export type RecipeFeedDto = {

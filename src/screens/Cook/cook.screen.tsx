@@ -719,8 +719,8 @@ const Cook = ({ navigation }: CookProps) => {
                 }}
                 onChangeText={(text) => setInstructiuniRecipe(text)}
               />
-              <DropdownComponent data={recipeDificulties || []} action={setDificultateRecipe} />
-              <DropdownComponent data={collectionList || []} action={setColectieRecipe} />
+              <DropdownComponent data={recipeDificulties || []} action={setDificultateRecipe} initialSelection=""/>
+              <DropdownComponent data={collectionList || []} action={setColectieRecipe} initialSelection=""/>
             </View>
             <View style={{ alignItems: 'center', alignContent: 'center' }}>
               {selectedRecipeImageUri ? (
