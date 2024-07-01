@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Timespan } from "react-native/Libraries/Utilities/IPerformanceLogger";
+import { UserResetPassProps } from "./types";
 
 type UrmarireDto = {
   id: string,
@@ -94,6 +95,14 @@ export const userInteractionSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    resetPassword: builder.mutation<undefined, UserResetPassProps>({
+      query: (post) => ({
+        url: "/passReset",
+        method: "POST",
+        body: post,
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -103,5 +112,6 @@ export const {
   useGetUsersBySearchQuery,
   useGetUserByIdQuery,
   useEditUserMutation,
-  useDeleteUserMutation 
+  useDeleteUserMutation,
+  useResetPasswordMutation 
 } = userInteractionSlice

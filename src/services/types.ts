@@ -95,3 +95,9 @@ export type RecipeSummaryDto = {
   reactii: string;
   comentarii: string;
 };
+
+export type UserResetPassProps = {
+  username: string;
+  oldPassword: string;
+  newPassword: string;
+};
