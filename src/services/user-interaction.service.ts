@@ -95,11 +95,14 @@ export const userInteractionSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
-    resetPassword: builder.mutation<undefined, UserResetPassProps>({
-      query: (post) => ({
+    resetPassword: builder.mutation<undefined, {user: UserResetPassProps,  token: string} >({
+      query: ({user, token}) => ({
         url: "/passReset",
         method: "POST",
-        body: post,
+        body: user,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }),
       invalidatesTags: ["Users"],
     }),

@@ -30,9 +30,12 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
   const { theme } = useThemeConsumer();
   const [selectedCollectionImageUri, setSelectedCollectionImageUri] = useState<string | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+
   const [newPassword, setNewPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const [formData, setFormData] = useState({
     nume: userData?.nume || '',
@@ -54,8 +57,8 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
   };
 
   const handleLogout = () => {
-    dispatch(updateToken(""))
-  }
+    dispatch(updateToken(""));
+  };
 
   const handleDeleteAccount = async () => {
     const userProps = {
@@ -71,27 +74,38 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     } catch (error) {
       console.log("Error deleting account: ", error);
     }
-    dispatch(updateToken(""))
-  }
+    dispatch(updateToken(""));
+  };
 
   const handlePassReset = async () => {
-    const userProps: UserResetPassProps = {
-      username,
-      newPassword,
-      oldPassword
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    const userProps = {
+      user: {
+        username,
+        newPassword,
+        oldPassword
+      },
+      token
     };
 
     try {
       const response: { data?: { id: string }; error?: any } = await resetPassword(userProps);
-      if (response && response.data && response.data.id) {
-        console.log("reset pass successfully: ", response);
+      if (response) {
+        console.log("Password reset successfully: ", response);
+        setIsResetModalVisible(false); 
+        dispatch(updateToken(""));
+      } else {
+        setPasswordError("The current password you entered is wrong");
       }
     } catch (error) {
-      console.log("Error reseting pass account: ", error);
+      console.log("Error reseting password: ", error);
+      setPasswordError("The current password you entered is wrong");
     }
-    dispatch(updateToken(""))
-  }
-
+  };
 
   const uploadImageAsync = async (uri: string) => {
     const blob: Blob = await new Promise((resolve, reject) => {
@@ -228,7 +242,7 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
         <View style={styles.separator} />
         <View style={styles.footerButtons}>
           <View style={styles.buttonContainer}>
-            <Button sx={{ backgroundColor: 'pink' }} title="Reset Password" onPress={handleSave} />
+            <Button sx={{ backgroundColor: 'pink' }} title="Reset Password" onPress={() => setIsResetModalVisible(true)} />
           </View>
           <View style={styles.buttonContainer}>
             <Button sx={{ backgroundColor: 'pink' }} title="Logout" onPress={handleLogout} />
@@ -249,6 +263,48 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
             <View style={styles.modalButtons}>
               <Button sx={{ margin: 10 }} variant="primary" onPress={() => setIsDeleteModalVisible(false)} title="Cancel" />
               <Button sx={{ margin: 10 }} variant="primary" onPress={handleDeleteAccount} title="Yes" />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal for resetting password */}
+      <Modal visible={isResetModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContentRecipe}>
+            <Text style={{ marginBottom: 15, justifyContent: 'center', fontSize: 18, color: theme.colors.cardTitle }}>
+              Reset Password
+            </Text>
+            <View style={styles.formGroup}>
+              <TextInput
+                label="Current Password"
+                value={oldPassword}
+                onChangeText={(text) => setOldPassword(text)}
+                secureTextEntry
+              />
+            </View>
+            <View style={styles.formGroup}>
+              <TextInput
+                label="New Password"
+                value={newPassword}
+                onChangeText={(text) => setNewPassword(text)}
+                secureTextEntry
+              />
+            </View>
+            <View style={styles.formGroup}>
+              <TextInput
+                label="Confirm New Password"
+                value={confirmNewPassword}
+                onChangeText={(text) => setConfirmNewPassword(text)}
+                secureTextEntry
+              />
+            </View>
+            {passwordError ? (
+              <Text style={styles.errorText}>{passwordError}</Text>
+            ) : null}
+            <View style={styles.modalButtons}>
+              <Button sx={{ margin: 10 }} variant="primary" onPress={() => setIsResetModalVisible(false)} title="Cancel" />
+              <Button sx={{ margin: 10 }} variant="primary" onPress={handlePassReset} title="Submit" />
             </View>
           </View>
         </View>
@@ -310,7 +366,7 @@ const styles = StyleSheet.create({
     padding: 30,
     borderRadius: 10,
     width: '90%',
-    height: '25%',
+    height: '50%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -319,6 +375,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 20,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 
