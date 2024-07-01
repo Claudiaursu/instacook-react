@@ -5,7 +5,7 @@ import { useThemeConsumer } from "../../utils/theme/theme.consumer";
 import { Button } from "../../components/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useEditUserMutation, useGetUserByUsernameQuery } from "../../services/user-interaction.service";
+import { useDeleteUserMutation, useEditUserMutation, useGetUserByUsernameQuery } from "../../services/user-interaction.service";
 import { ProfileStackParamList } from "../ProfileNavigator/navigator.types";
 import { TextInput } from "../../components/text-input";
 import * as ImagePicker from 'expo-image-picker';
@@ -14,6 +14,7 @@ import { getStorage } from "firebase/storage";
 import uuid from 'react-native-uuid';
 import { UserPictureComponent } from "../../components/user-profile-picture/user-profile-picture.component";
 import { setValue } from "../../store/profilePhoto.slice";
+import { updateToken } from "../../store/tokenSlice";
 
 type ProfileEditProps = NativeStackScreenProps<ProfileStackParamList, "EditProfile">;
 
@@ -43,7 +44,30 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const handleLogout = () => {
+    dispatch(updateToken(""))
+  }
+
+  const handleDeleteAccount = async () => {
+    const userProps = {
+      id: loggedId,
+      token
+    };
+
+    try {
+    
+      const response: { data?: { id: string }; error?: any } = await deleteUser(userProps);
+      if (response && response.data && response.data.id) {
+        console.log("sters cu succes ", response);
+      }
+    } catch (error) {
+      console.log("eoare creare colectie: ", error);
+    }
+    dispatch(updateToken(""))
+  }
+
   const [editUser, { isSuccess: editUserSuccess }] = useEditUserMutation();
+  const [deleteUser, { isSuccess: deleteUserSuccess }] = useDeleteUserMutation();
 
   const uploadImageAsync = async (uri: string) => {
     const blob: Blob = await new Promise((resolve, reject) => {
@@ -183,10 +207,10 @@ const EditProfile = ({ route, navigation }: ProfileEditProps) => {
             <Button sx={{ backgroundColor: 'pink' }} title="Reset Password" onPress={handleSave} />
           </View>
           <View style={styles.buttonContainer}>
-            <Button sx={{ backgroundColor: 'pink' }} title="Logout" onPress={handleSave} />
+            <Button sx={{ backgroundColor: 'pink' }} title="Logout" onPress={handleLogout} />
           </View>
           <View style={styles.buttonContainer}>
-            <Button sx={{ backgroundColor: theme.colors.cardTitle }} title="Delete Account" onPress={handleSave} />
+            <Button sx={{ backgroundColor: theme.colors.cardTitle }} title="Delete Account" onPress={handleDeleteAccount} />
           </View>
         </View>
       </ScrollView>

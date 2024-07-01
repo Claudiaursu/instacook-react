@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   ingredientText: {
     fontSize: 14,
-    color: "pink",
+    color: "#bf4080",
     marginLeft: 8,
   },
   instructions: {

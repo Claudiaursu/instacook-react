@@ -113,9 +113,9 @@ const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }
         toggleThemeSchema
     } = useThemeConsumer();
 
-    const logout = () => {
-        dispatch(updateToken(""))
-    }
+    // const logout = () => {
+    //     dispatch(updateToken(""))
+    // }
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -242,13 +242,6 @@ const Profile = ({ route, navigation }: { route: any, navigation: ProfileProps }
 
                     <TabViewProfile userId={loggedId} refresh={refresh} />
 
-                    <View>
-                        <Button
-                            sx={{ margin: 10 }}
-                            variant="primary"
-                            onPress={() => logout()}
-                            title="Sign out" />
-                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>

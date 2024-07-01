@@ -72,11 +72,22 @@ export const userInteractionSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    deleteUser: builder.mutation<undefined, { id: number,  token: string}>({
+      query: ({id, token}) => ({
+        url: `/${id}`,
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Users"],
+    }),
     editUser: builder.mutation<undefined, { user: UserProps, token: string, id: string} >({
       query: ({user, token, id}) => ({
         url: `/${id}`,
         method: "PATCH",
         body: user,
+
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -91,5 +102,6 @@ export const {
   useGetUserByUsernameQuery,
   useGetUsersBySearchQuery,
   useGetUserByIdQuery,
-  useEditUserMutation 
+  useEditUserMutation,
+  useDeleteUserMutation 
 } = userInteractionSlice
